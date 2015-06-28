@@ -61,6 +61,27 @@ database
 	});
 ``` -->
 
+# Quality and Compatibility
+
+[![Build Status](https://travis-ci.org/FreeAllMedia/almaden.png?branch=master)](https://travis-ci.org/FreeAllMedia/almaden) [![Code Climate](https://codeclimate.com/github/FreeAllMedia/almaden/badges/gpa.svg)](https://codeclimate.com/github/FreeAllMedia/almaden) [![Dependency Status](https://david-dm.org/FreeAllMedia/almaden.png?theme=shields.io)](https://david-dm.org/FreeAllMedia/almaden?theme=shields.io) [![Dev Dependency Status](https://david-dm.org/FreeAllMedia/almaden/dev-status.svg)](https://david-dm.org/FreeAllMedia/almaden?theme=shields.io#info=devDependencies)
+
+*Every build and release is automatically tested on the following platforms:*
+
+![node 0.12.x](https://img.shields.io/badge/node-0.12.x-brightgreen.svg) ![node 0.11.x](https://img.shields.io/badge/node-0.11.x-brightgreen.svg) ![node 0.10.x](https://img.shields.io/badge/node-0.10.x-brightgreen.svg)
+![iojs 2.x.x](https://img.shields.io/badge/iojs-2.x.x-brightgreen.svg) ![iojs 1.x.x](https://img.shields.io/badge/iojs-1.x.x-brightgreen.svg)
+
+
+[![Sauce Test Status](https://saucelabs.com/browser-matrix/almaden.svg)](https://saucelabs.com/u/almaden)
+
+
+*If your platform is not listed above, you can test your local environment for compatibility by copying and pasting the following commands into your terminal:*
+
+```
+npm install almaden
+cd node_modules/almaden
+gulp test-local
+```
+
 ## Features
 
 ### Normalized Interface
@@ -151,27 +172,6 @@ query.where("id", 4);
 query.results((error, rows) => {
 	// Do something with the results
 });
-```
-
-# Quality and Compatibility
-
-[![Build Status](https://travis-ci.org/FreeAllMedia/almaden.png?branch=master)](https://travis-ci.org/FreeAllMedia/almaden) [![Code Climate](https://codeclimate.com/github/FreeAllMedia/almaden/badges/gpa.svg)](https://codeclimate.com/github/FreeAllMedia/almaden) [![Dependency Status](https://david-dm.org/FreeAllMedia/almaden.png?theme=shields.io)](https://david-dm.org/FreeAllMedia/almaden?theme=shields.io) [![Dev Dependency Status](https://david-dm.org/FreeAllMedia/almaden/dev-status.svg)](https://david-dm.org/FreeAllMedia/almaden?theme=shields.io#info=devDependencies)
-
-*Every build and release is automatically tested on the following platforms:*
-
-![node 0.12.x](https://img.shields.io/badge/node-0.12.x-brightgreen.svg) ![node 0.11.x](https://img.shields.io/badge/node-0.11.x-brightgreen.svg) ![node 0.10.x](https://img.shields.io/badge/node-0.10.x-brightgreen.svg)
-![iojs 2.x.x](https://img.shields.io/badge/iojs-2.x.x-brightgreen.svg) ![iojs 1.x.x](https://img.shields.io/badge/iojs-1.x.x-brightgreen.svg)
-
-
-[![Sauce Test Status](https://saucelabs.com/browser-matrix/almaden.svg)](https://saucelabs.com/u/almaden)
-
-
-*If your platform is not listed above, you can test your local environment for compatibility by copying and pasting the following commands into your terminal:*
-
-```
-npm install almaden
-cd node_modules/almaden
-gulp test-local
 ```
 
 # Installation
