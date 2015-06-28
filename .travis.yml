@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+  - '0.12'
+  - '0.11'
+  - '0.10'
+  - iojs-v1
+  - iojs-v2
+script: npm test
+before_script:
+  - npm install
+after_success:
+  - ./node_modules/coveralls/bin/coveralls.js < ./lcov.info
+env:
+  global:
+    - secure: uw28cJsi1cSA1BmMNXk8c9TZ/Q725BO6zBKgav7OL3XwaKDkMcxbMQzzohQkIG9Grtz3jY8gAtAmnpYNcad3WWrS4Bs8wBjjkinSVW1SkIwuTWLNQh3D7gNBhoiuzDzYpP57DTuInfSPBShfzCIJpTCLZmaHPORGxi0Qh/KF2N/WOjzaAqF6It7EioAqB2ojcQAYvtlJY/gIdN/o/Fgen+tOgBYXXyGDblI8vnboXgk1BPRf5E6pC+9jgHqijAxyAmMwfWwQNT/2IlPEECOWb7uL7o03JqSxJPLo7tu97lQb/RVwRpOPwvWQ70TssACWyz0ZsALA9EvSmlePFTvrUFMd2VNkW5Mf0oXgPSN9C4J2CWOKWSdkfojGzpLr7KWbNhlx1NDqta/xmEu3yCq8dJjJXLosy0A6szqldeUGI7lPtNSJfwrx19gNXyBaFeYXNws5dlXqfX+Op50cQWy4rYjoMW+idFn59PkCy34a0HsqEWV7J+uQ+R16ycc2wxgjUcDJUxZ0dZmwJ4CmEMGNFhhH/k92FsZTvc0hK/jzLSg5BH8/ng9M751+yJwGP6sfVS53sIjXG6sVAgzAsmEK1VRtMnhaqRZGl/2RzcDBhhWm+EDBHL6xwKGZmHdbuAFJjiPF71Pab+kreogSdQ6hZDFLtD4qROxfBA+0BjWxNLo=
+    - secure: I2nXG1qV83dq3S2uwWAnBbujhAzHMnwX9ww+5WjBORlIhdKFVBxY7b2OKaCGJ9TbsCH5sB9s9KIwnnr8sDi78izFwOEn2tBOk27cOO5iE784UbPm5F9K3v+FsO7ZC0ltzFqVM9Q1RE6iSD5KVJoiffHITdiEyCL9KUbqSxgoLiV10nOj/yaRiFvyYhPTlr2EjZWnfpUZQRktiiVRzFJJURm4+YXUQlHRSm1oVt3N5uTGS/7CO5eN0uqUZK3FZmPoGn4JO7zuC3VaqOOcOsY3DGeTCfh0pc6vHUktBguxHyRviVt6DjNFCmhkMu8d5Ndz8TA1/pqLj6hLqyALCd112AA6ewDf+C0Bx5Y5zR9vh2lu4VcF4dIojaCfHL29F1hk4Lky9T/UfxhJi39iL8yZIP1dv5Z7N6FwLqKXxb/yM9tj3folhRj3itTf4E+KK+FHTwC/dkBjBq4NAiwnSBa3SphY6H0pTey6nLnGqdgm1IZNARtVSbdDi0Jbm/YzJPl69j++ai865+Qw9Y+GxNLMDC5KQNGuyY72Y5DDO5fC3POG2BkWD6sU7q2Z5jUSg776eYcUR4eEA21ZHadbsifI8zBpCXhQrtkL+1v9+xNvH7kl4rXofLN7IO5QC8sLNyF3hra0BXEtRe1ryttW/2rqZ0Kni64bAMKTT2272HtUKz0=
