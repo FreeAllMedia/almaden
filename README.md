@@ -1,12 +1,156 @@
 # Almaden.js [![npm version](https://img.shields.io/npm/v/almaden.svg)](https://www.npmjs.com/package/almaden) [![license type](https://img.shields.io/npm/l/almaden.svg)](https://github.com/FreeAllMedia/almaden.git/blob/master/LICENSE) [![npm downloads](https://img.shields.io/npm/dm/almaden.svg)](https://www.npmjs.com/package/almaden) ![ECMAScript 6 & 5](https://img.shields.io/badge/ECMAScript-6%20/%205-red.svg)
 
-ES6 data adapter.
+Universal data adapter providing a normalized interface for interacting with data sources on servers and browsers.
+
+<!-- When used on a server, Almaden.js is powered by `knex.js`, a rock-solid database adapter with many client types such as `mysql`, `sqlite`, `postgres`, `oracle`, and more.
+
+When used in the browser, Almaden.js uses the exact same interface to call remote APIs, just as though the APIs were a database on the server.
+
+**Server Example:** -->
 
 ```javascript
-import Almaden from "almaden";
+import Database from "almaden";
 
-const almaden = new Almaden;
-almaden.saySomething(); // will output "Something"
+const database = new Database({
+	"debug": false,
+	"client": "mysql",
+	"connection": {
+		"host": "localhost",
+		"user": "root",
+		"password": "",
+		"database": "almaden_test"
+	}
+});
+
+database
+	.insert({name:"Bob"})
+	.into("users")
+	.results((error, rows) => {
+
+	});
+```
+
+<!-- **Browser Example:**
+
+```javascript
+import Database from "almaden";
+
+const database = new Database({
+	"debug": false,
+	"client": "json-api",
+	"connection": {
+		"host": "https://api.freeallmedia.com/",
+		"authentication": {
+				"path": "client",
+				"method": "GET",
+				"headers": {
+					"Api-Key": "Your API Key Here"
+				},
+				"tokenName": "clientAccessToken"
+		}
+	}
+});
+
+database
+	.select("*")
+	.from("users")
+	.where("id", 1)
+	.results((error, rows) => {
+		// Remotely called `GET https://api.freeallmedia.com/client`
+		// Remotely called `GET https://api.freeallmedia.com/users/1`
+	});
+``` -->
+
+## Features
+
+### Normalized Interface
+
+**Knex.js:**
+
+``` javascript
+knex
+	.select("*")
+	.from("users")
+	.where("id", 1);
+
+knex("users")
+	.insert({name:"Bob"});
+
+knex.schema
+	.createTable("users", tableConstructor);
+```
+
+**Almaden.js:**
+
+```javascript
+database
+	.select("*")
+	.from("users")
+	.where("id", 1);
+
+database
+	.insert({name:"Bob"})
+	.into("users");
+
+database
+	.creatTable("users", tableConstructor);
+```
+
+### Built-In Mocking
+
+``` javascript
+const mockResponseData = [
+	{id:1,name:"Bob"},
+	{id:2,name:"Gary"}
+];
+
+database.mock({
+	"select * from users":
+		mockResponseData,
+
+	"select * from users where id=#$@#$":
+		new Error("This is a mocked error response."),
+
+	/select \* from users where id=[a-zA-Z]*/:
+		new Error("ID must be numeric.")
+});
+
+database
+	.select("*")
+	.from("users")
+	.results((error, rows) => {
+		rows.should.eql(mockResponseData); // true
+	});
+
+database
+	.select("*")
+	.from("users")
+	.where("id", "#$@#$")
+	.results((error, rows) => {
+		error.message.should.eql("This is a mocked error response.")
+	});
+
+database
+	.select("*")
+	.from("users")
+	.where("id", "abc")
+	.results((error, rows) => {
+		error.message.should.eql("ID must be numeric.")
+	});
+```
+
+### Portable Queries
+
+```javascript
+const query = database.select("*");
+
+typeof query; // Query
+
+query.where("id", 4);
+
+query.results((error, rows) => {
+	// Do something with the results
+});
 ```
 
 # Quality and Compatibility
@@ -78,5 +222,3 @@ It's easy to run the test suite locally, and *highly recommended* if you're usin
 ```
 npm test
 ```
-
-
