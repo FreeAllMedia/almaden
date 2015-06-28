@@ -1,0 +1,36 @@
+{
+	"development": {
+		"debug": true,
+		"client": "mysql",
+		"connection": {
+			"host": "localhost",
+			"user": "root",
+			"password": "",
+			"database": "almaden_development"
+		},
+		"pool": {
+			"max": 2,
+			"min": 2
+		},
+		"migrations": {
+			"tableName": "migrations"
+		}
+	},
+	"testing": {
+		"debug": false,
+		"client": "mysql",
+		"connection": {
+			"host": "localhost",
+			"user": "root",
+			"password": "",
+			"database": "almaden_test"
+		},
+		"pool": {
+			"max": 2,
+			"min": 2
+		},
+		"migrations": {
+			"tableName": "migrations"
+		}
+	}
+}
