@@ -36,6 +36,16 @@ var Database = (function () {
 			this._knex.destroy(callback);
 		}
 	}, {
+		key: "spy",
+		value: function spy(query, returnValue) {
+			if (!this._mockQueries) {
+				this._mockQueries = {};
+			}
+			var querySpy = new QuerySpy(query, returnValue);
+			this._mockQueries[query] = querySpy;
+			return querySpy;
+		}
+	}, {
 		key: "mock",
 		value: function mock(queryValueMatrix) {
 			this._mockQueries = queryValueMatrix;
@@ -230,19 +240,35 @@ var Query = (function () {
 			return this;
 		}
 	}, {
-		key: "orWhere",
-		value: function orWhere() {
+		key: "whereNull",
+		value: function whereNull() {
 			var _query3;
 
-			this._query = (_query3 = this._query).orWhere.apply(_query3, arguments);
+			this._query = (_query3 = this._query).whereNull.apply(_query3, arguments);
+			return this;
+		}
+	}, {
+		key: "whereNotNull",
+		value: function whereNotNull() {
+			var _query4;
+
+			this._query = (_query4 = this._query).whereNotNull.apply(_query4, arguments);
+			return this;
+		}
+	}, {
+		key: "orWhere",
+		value: function orWhere() {
+			var _query5;
+
+			this._query = (_query5 = this._query).orWhere.apply(_query5, arguments);
 			return this;
 		}
 	}, {
 		key: "groupBy",
 		value: function groupBy() {
-			var _query4;
+			var _query6;
 
-			this._query = (_query4 = this._query).groupBy.apply(_query4, arguments);
+			this._query = (_query6 = this._query).groupBy.apply(_query6, arguments);
 			return this;
 		}
 	}, {
@@ -260,9 +286,9 @@ var Query = (function () {
 	}, {
 		key: "leftJoin",
 		value: function leftJoin() {
-			var _query5;
+			var _query7;
 
-			this._query = (_query5 = this._query).leftJoin.apply(_query5, arguments);
+			this._query = (_query7 = this._query).leftJoin.apply(_query7, arguments);
 			return this;
 		}
 	}, {
@@ -306,6 +332,8 @@ var Query = (function () {
 						if (results) {
 							if (results instanceof Error) {
 								callback(results, null);
+							} else if (results instanceof QuerySpy) {
+								callback(null, results.call);
 							} else {
 								callback(null, results);
 							}
@@ -322,12 +350,22 @@ var Query = (function () {
 								if (key.charAt && key.charAt(0) === "/") {
 									var regularExpressionString = key.substr(1).substr(0, key.length - 2);
 									var regularExpression = new RegExp(regularExpressionString);
-									var result = mockQueries[key];
+									var _results = mockQueries[key];
 
 									if (query.match(regularExpression)) {
-										return {
-											v: callback(null, result)
-										};
+										if (_results instanceof Error) {
+											return {
+												v: callback(_results, null)
+											};
+										} else if (_results instanceof QuerySpy) {
+											return {
+												v: callback(null, _results.call)
+											};
+										} else {
+											return {
+												v: callback(null, _results)
+											};
+										}
 									}
 								}
 							}
@@ -353,3 +391,38 @@ var Query = (function () {
 })();
 
 exports.Query = Query;
+
+var QuerySpy = function QuerySpy(query, value) {
+	var _this4 = this;
+
+	_classCallCheck(this, QuerySpy);
+
+	Object.defineProperties(this, {
+		"_calls": {
+			enumerable: false,
+			writable: true,
+			value: 0
+		},
+		"callCount": {
+			get: function get() {
+				return _this4._calls;
+			}
+		},
+		"call": {
+			get: function get() {
+				_this4._calls += 1;
+				return _this4._value;
+			}
+		},
+		"_query": {
+			enumerable: true,
+			value: query
+		},
+		"_value": {
+			enumerable: true,
+			value: value
+		}
+	});
+};
+
+exports.QuerySpy = QuerySpy;

@@ -22,7 +22,7 @@ const databaseConfig = require("../../database.json").testing;
  */
 const useMockDatabase = true;
 
-import Database, {Query} from "../lib/almaden.js";
+import Database, {Query, QuerySpy} from "../lib/database.js";
 
 describe("Database(databaseConfig)", () => {
 
@@ -112,6 +112,23 @@ describe("Database(databaseConfig)", () => {
 						});
 				});
 
+				it("should allow regex keys for lookup an Error", done => {
+					const regexKey = /select \* from `users` where `id` = [0-9]/;
+					const errorData = new Error("Intentional Error");
+					mockRows = [1, 2, 3];
+					database.mock({
+						[regexKey]: errorData
+					});
+					database
+						.select("*")
+						.from("users")
+						.where("id", 5)
+						.results((error) => {
+							error.should.equal(errorData);
+							done();
+						});
+				});
+
 				it("should throw an error for undesignated queries", () => {
 					() => {
 						database
@@ -152,6 +169,63 @@ describe("Database(databaseConfig)", () => {
 			});
 		});
 
+		describe("(spying)", () => {
+			describe("QuerySpy", () => {
+				let querySpy,
+					value;
+
+				beforeEach(() => {
+					value = {age: 24};
+					querySpy = new QuerySpy("somekey", value);
+				});
+
+				it("should have a callCount property", () => {
+					querySpy.should.have.property("callCount");
+				});
+
+				it("should increase callCount when call is called", () => {
+					querySpy.call;
+					querySpy.callCount.should.equal(1);
+				});
+
+				it("should return value when call is called", () => {
+					querySpy.call.should.equal(value);
+				});
+			});
+
+			describe(".spy", () => {
+				it("should return a QuerySpy object", () => {
+					database.spy("somequery", [{}]).should.be.instanceOf(QuerySpy);
+				});
+
+				describe("(with QuerySpy object)", () => {
+					beforeEach(() => {
+						database.mock({});
+					});
+
+					it("it should allow to count how many calls where made to the string query", done => {
+						let spy = database.spy("select * from `users`", [{}, {}]);
+						database.select("*")
+							.from("users")
+							.results(() => {
+								spy.callCount.should.equal(1);
+								done();
+							});
+					});
+
+					it("it should allow to count how many calls where made to the regex query", done => {
+						let spy = database.spy(/select \* from `[a-z]*`/, [{}, {}]);
+						database.select("*")
+							.from("users")
+							.results(() => {
+								spy.callCount.should.equal(1);
+								done();
+							});
+					});
+				});
+			});
+		});
+
 		describe("(query chaining)", () => {
 			let query;
 
@@ -180,6 +254,18 @@ describe("Database(databaseConfig)", () => {
 			describe(".andWhere(...options)", () => {
 				it("should return itself to enable function chaining", () => {
 					query.andWhere("id=1").should.be.instanceOf(Query);
+				});
+			});
+
+			describe(".whereNull(...options)", () => {
+				it("should return itself to enable function chaining", () => {
+					query.whereNull("id=1").should.be.instanceOf(Query);
+				});
+			});
+
+			describe(".whereNotNull(...options)", () => {
+				it("should return itself to enable function chaining", () => {
+					query.whereNotNull("id=1").should.be.instanceOf(Query);
 				});
 			});
 

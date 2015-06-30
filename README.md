@@ -160,6 +160,37 @@ database
 	});
 ```
 
+### Built-In Spying
+
+``` javascript
+const spyResponseData = [
+	{id:1,name:"Bob"},
+	{id:2,name:"Gary"}
+];
+
+//string or regex
+let selectQuerySpy = database.spy("select * from `users`", spyResponseData);
+let deleteQuerySpy = this.database.spy(/select * from `users` where `id` = '[0-9]*'/, {id: 5, name: "Jane"});
+
+database
+	.select("*")
+	.from("users")
+	.results((error, rows) => {
+		rows.should.eql(spyResponseData); // true
+	});
+
+database
+	.select("*")
+	.from("users")
+	.where("id", "1")
+	.results((error, rows) => {
+		//do something with Jane...
+	});
+
+selectQuerySpy.callCount.should.equal(1);
+deleteQuerySpy.callCount.should.equal(1);
+```
+
 ### Portable Queries
 
 ```javascript

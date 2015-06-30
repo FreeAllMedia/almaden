@@ -24,6 +24,15 @@ export default class Database {
 		this._knex.destroy(callback);
 	}
 
+	spy(query, returnValue) {
+		if(!this._mockQueries) {
+			this._mockQueries = {};
+		}
+		const querySpy = new QuerySpy(query, returnValue);
+		this._mockQueries[query] = querySpy;
+		return querySpy;
+	}
+
 	mock(queryValueMatrix) {
 		this._mockQueries = queryValueMatrix;
 	}
@@ -171,6 +180,16 @@ export class Query {
 		return this;
 	}
 
+	whereNull(...options) {
+		this._query = this._query.whereNull(...options);
+		return this;
+	}
+
+	whereNotNull(...options) {
+		this._query = this._query.whereNotNull(...options);
+		return this;
+	}
+
 	orWhere(...options) {
 		this._query = this._query.orWhere(...options);
 		return this;
@@ -228,6 +247,8 @@ export class Query {
 				if (results) {
 					if (results instanceof Error) {
 						callback(results, null);
+					} else if(results instanceof QuerySpy) {
+						callback(null, results.call);
 					} else {
 						callback(null, results);
 					}
@@ -244,10 +265,16 @@ export class Query {
 						if (key.charAt && key.charAt(0) === "/") {
 							const regularExpressionString = key.substr(1).substr(0, key.length-2);
 							const regularExpression = new RegExp(regularExpressionString);
-							const result = mockQueries[key];
+							const results = mockQueries[key];
 
 							if (query.match(regularExpression)) {
-								return callback(null, result);
+								if (results instanceof Error) {
+									return callback(results, null);
+								} else if(results instanceof QuerySpy) {
+									return callback(null, results.call);
+								} else {
+									return callback(null, results);
+								}
 							}
 						}
 					}
@@ -263,5 +290,36 @@ export class Query {
 		} else {
 			throw new Error("Cannot perform query without valid query stack. See docs for proper usage.");
 		}
+	}
+}
+
+export class QuerySpy {
+	constructor(query, value) {
+		Object.defineProperties(this, {
+			"_calls": {
+				enumerable: false,
+				writable: true,
+				value: 0
+			},
+			"callCount": {
+				get: () => {
+					return this._calls;
+				}
+			},
+			"call": {
+				get: () => {
+					this._calls += 1;
+					return this._value;
+				}
+			},
+			"_query": {
+				enumerable: true,
+				value: query
+			},
+			"_value": {
+				enumerable: true,
+				value: value
+			}
+		});
 	}
 }

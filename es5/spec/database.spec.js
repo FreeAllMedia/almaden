@@ -13,9 +13,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-var _libAlmadenJs = require("../lib/almaden.js");
+var _libDatabaseJs = require("../lib/database.js");
 
-var _libAlmadenJs2 = _interopRequireDefault(_libAlmadenJs);
+var _libDatabaseJs2 = _interopRequireDefault(_libDatabaseJs);
 
 var userFixtures = require("./fixtures/users.json");
 var addressFixtures = require("./fixtures/addresses.json");
@@ -37,7 +37,7 @@ describe("Database(databaseConfig)", function () {
 	var database = undefined;
 
 	beforeEach(function () {
-		database = new _libAlmadenJs2["default"](databaseConfig);
+		database = new _libDatabaseJs2["default"](databaseConfig);
 		if (useMockDatabase) {
 			mockDatabase(database);
 		}
@@ -107,6 +107,17 @@ describe("Database(databaseConfig)", function () {
 					});
 				});
 
+				it("should allow regex keys for lookup an Error", function (done) {
+					var regexKey = /select \* from `users` where `id` = [0-9]/;
+					var errorData = new Error("Intentional Error");
+					mockRows = [1, 2, 3];
+					database.mock(_defineProperty({}, regexKey, errorData));
+					database.select("*").from("users").where("id", 5).results(function (error) {
+						error.should.equal(errorData);
+						done();
+					});
+				});
+
 				it("should throw an error for undesignated queries", function () {
 					(function () {
 						database.select("*").from("users").where("id", 3).results();
@@ -135,6 +146,59 @@ describe("Database(databaseConfig)", function () {
 			});
 		});
 
+		describe("(spying)", function () {
+			describe("QuerySpy", function () {
+				var querySpy = undefined,
+				    value = undefined;
+
+				beforeEach(function () {
+					value = { age: 24 };
+					querySpy = new _libDatabaseJs.QuerySpy("somekey", value);
+				});
+
+				it("should have a callCount property", function () {
+					querySpy.should.have.property("callCount");
+				});
+
+				it("should increase callCount when call is called", function () {
+					querySpy.call;
+					querySpy.callCount.should.equal(1);
+				});
+
+				it("should return value when call is called", function () {
+					querySpy.call.should.equal(value);
+				});
+			});
+
+			describe(".spy", function () {
+				it("should return a QuerySpy object", function () {
+					database.spy("somequery", [{}]).should.be.instanceOf(_libDatabaseJs.QuerySpy);
+				});
+
+				describe("(with QuerySpy object)", function () {
+					beforeEach(function () {
+						database.mock({});
+					});
+
+					it("it should allow to count how many calls where made to the string query", function (done) {
+						var spy = database.spy("select * from `users`", [{}, {}]);
+						database.select("*").from("users").results(function () {
+							spy.callCount.should.equal(1);
+							done();
+						});
+					});
+
+					it("it should allow to count how many calls where made to the regex query", function (done) {
+						var spy = database.spy(/select \* from `[a-z]*`/, [{}, {}]);
+						database.select("*").from("users").results(function () {
+							spy.callCount.should.equal(1);
+							done();
+						});
+					});
+				});
+			});
+		});
+
 		describe("(query chaining)", function () {
 			var query = undefined;
 
@@ -144,55 +208,67 @@ describe("Database(databaseConfig)", function () {
 
 			describe(".select(...columns) ", function () {
 				it("should return itself to enable function chaining", function () {
-					query.should.be.instanceOf(_libAlmadenJs.Query);
+					query.should.be.instanceOf(_libDatabaseJs.Query);
 				});
 			});
 
 			describe(".from(tableName)", function () {
 				it("should return itself to enable function chaining", function () {
-					query.from("users").should.be.instanceOf(_libAlmadenJs.Query);
+					query.from("users").should.be.instanceOf(_libDatabaseJs.Query);
 				});
 			});
 
 			describe(".where(...options)", function () {
 				it("should return itself to enable function chaining", function () {
-					query.where("id=1").should.be.instanceOf(_libAlmadenJs.Query);
+					query.where("id=1").should.be.instanceOf(_libDatabaseJs.Query);
 				});
 			});
 
 			describe(".andWhere(...options)", function () {
 				it("should return itself to enable function chaining", function () {
-					query.andWhere("id=1").should.be.instanceOf(_libAlmadenJs.Query);
+					query.andWhere("id=1").should.be.instanceOf(_libDatabaseJs.Query);
+				});
+			});
+
+			describe(".whereNull(...options)", function () {
+				it("should return itself to enable function chaining", function () {
+					query.whereNull("id=1").should.be.instanceOf(_libDatabaseJs.Query);
+				});
+			});
+
+			describe(".whereNotNull(...options)", function () {
+				it("should return itself to enable function chaining", function () {
+					query.whereNotNull("id=1").should.be.instanceOf(_libDatabaseJs.Query);
 				});
 			});
 
 			describe(".orWhere(...options)", function () {
 				it("should return itself to enable function chaining", function () {
-					query.orWhere("id=1").should.be.instanceOf(_libAlmadenJs.Query);
+					query.orWhere("id=1").should.be.instanceOf(_libDatabaseJs.Query);
 				});
 			});
 
 			describe(".groupBy(...columnNames)", function () {
 				it("should return itself to enable function chaining", function () {
-					query.groupBy("age").should.be.instanceOf(_libAlmadenJs.Query);
+					query.groupBy("age").should.be.instanceOf(_libDatabaseJs.Query);
 				});
 			});
 
 			describe(".orderBy(column, [direction]) ", function () {
 				it("should return itself to enable function chaining", function () {
-					query.orderBy("age", "desc").should.be.instanceOf(_libAlmadenJs.Query);
+					query.orderBy("age", "desc").should.be.instanceOf(_libDatabaseJs.Query);
 				});
 			});
 
 			describe(".limit(number)", function () {
 				it("should return itself to enable function chaining", function () {
-					query.orderBy(1).should.be.instanceOf(_libAlmadenJs.Query);
+					query.orderBy(1).should.be.instanceOf(_libDatabaseJs.Query);
 				});
 			});
 
 			describe("leftJoin(tableName, optionOne, optionTwo)", function () {
 				it("should return itself to enable function chaining", function () {
-					query.leftJoin("accounts", "users.id", "accounts.user_id").should.be.instanceOf(_libAlmadenJs.Query);
+					query.leftJoin("accounts", "users.id", "accounts.user_id").should.be.instanceOf(_libDatabaseJs.Query);
 				});
 			});
 		});
@@ -213,7 +289,7 @@ describe("Database(databaseConfig)", function () {
 
 		describe(".count([column], callback)", function () {
 			it("should return itself to enable function chaining", function () {
-				database.count().should.be.instanceOf(_libAlmadenJs.Query);
+				database.count().should.be.instanceOf(_libDatabaseJs.Query);
 			});
 		});
 
@@ -225,7 +301,7 @@ describe("Database(databaseConfig)", function () {
 
 		describe(".dropTable(tableName)", function () {
 			it("should return itself to enable function chaining", function () {
-				database.dropTable().should.be.instanceOf(_libAlmadenJs.Query);
+				database.dropTable().should.be.instanceOf(_libDatabaseJs.Query);
 			});
 
 			it("should drop the table from the database", function (done) {
@@ -238,7 +314,7 @@ describe("Database(databaseConfig)", function () {
 
 		describe(".insert(data)", function () {
 			it("should return itself to enable function chaining", function () {
-				database.insert().should.be.instanceOf(_libAlmadenJs.Query);
+				database.insert().should.be.instanceOf(_libDatabaseJs.Query);
 			});
 
 			it("should insert a row into the table", function (done) {
@@ -271,7 +347,7 @@ describe("Database(databaseConfig)", function () {
 			});
 
 			it("should return itself to enable function chaining", function () {
-				database.update().should.be.instanceOf(_libAlmadenJs.Query);
+				database.update().should.be.instanceOf(_libDatabaseJs.Query);
 			});
 
 			it("should update a row into the table", function (done) {
@@ -297,7 +373,7 @@ describe("Database(databaseConfig)", function () {
 			});
 
 			it("should return itself to enable function chaining", function () {
-				database["delete"]().should.be.instanceOf(_libAlmadenJs.Query);
+				database["delete"]().should.be.instanceOf(_libDatabaseJs.Query);
 			});
 
 			it("should delete a row into the table", function (done) {
@@ -312,13 +388,13 @@ describe("Database(databaseConfig)", function () {
 
 		describe(".into(tableName)", function () {
 			it("should return itself to enable function chaining", function () {
-				database.insert({}).into().should.be.instanceOf(_libAlmadenJs.Query);
+				database.insert({}).into().should.be.instanceOf(_libDatabaseJs.Query);
 			});
 		});
 
 		describe(".createTable(tableName, tableConstructor)", function () {
 			it("should return itself to enable function chaining", function () {
-				database.createTable().should.be.instanceOf(_libAlmadenJs.Query);
+				database.createTable().should.be.instanceOf(_libDatabaseJs.Query);
 			});
 
 			xit("should insert a row into the table", function (done) {
