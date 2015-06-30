@@ -1,1 +1,1 @@
-module.exports = require("./es5/lib/almaden.js");
+module.exports = require("./es5/lib/database.js");
