@@ -322,7 +322,7 @@ describe("Database(databaseConfig)", function () {
 					"id": 6,
 					"name": "Bob Builder",
 					"age": 34
-				}).into("users").results(function (errors) {
+				}).into("users").results(function () {
 					database.select("*").from("users").where("id", 6).results(function (errors, rows) {
 						rows[0].name.should.eql("Bob Builder");
 						done();
@@ -417,6 +417,11 @@ describe("Database(databaseConfig)", function () {
 					});
 				});
 			});
+		});
+
+		describe("(migrations)", function () {
+			it("should work as a CLI");
+			it("should generate the specified tables");
 		});
 
 		//Test scenarios for combinations will be hughe with many complex data mocked up

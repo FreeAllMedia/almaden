@@ -359,11 +359,11 @@ describe("Database(databaseConfig)", () => {
 						"age": 34
 					})
 					.into("users")
-					.results((errors) => {
+					.results(() => {
 						database
 							.select("*")
 							.from("users")
-							.where("id",6)
+							.where("id", 6)
 							.results((errors, rows) => {
 								rows[0].name.should.eql("Bob Builder");
 								done();
@@ -482,6 +482,11 @@ describe("Database(databaseConfig)", () => {
 							});
 					});
 			});
+		});
+
+		describe("(migrations)", () => {
+			it("should work as a CLI");
+			it("should generate the specified tables");
 		});
 
 		//Test scenarios for combinations will be hughe with many complex data mocked up
