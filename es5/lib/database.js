@@ -11,49 +11,59 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var knex = require("knex");
 var async = require("flowsync");
 
+var privateData = new WeakMap();
+
+var internal = function internal(object) {
+	if (!privateData.has(object)) {
+		privateData.set(object, {});
+	}
+	return privateData.get(object);
+};
+
 var Database = (function () {
 	function Database(databaseConfig) {
-		var _this = this;
-
 		_classCallCheck(this, Database);
 
-		["_knex", "_query", "_mockQueries"].forEach(function (privatePropertyName) {
-			Object.defineProperty(_this, privatePropertyName, {
-				writable: true,
-				value: undefined,
-				enumerable: false
-			});
-		});
+		internal(this)._knex = knex(databaseConfig);
 
-		this._knex = knex(databaseConfig);
-		this._query = this._knex;
-		this._mockQueries = undefined;
+		internal(this)._query = this.getKnex();
+		internal(this)._mockQueries = undefined;
 	}
 
 	_createClass(Database, [{
+		key: "getKnex",
+		value: function getKnex() {
+			return internal(this)._knex;
+		}
+	}, {
+		key: "getMockQueries",
+		value: function getMockQueries() {
+			return internal(this)._mockQueries;
+		}
+	}, {
 		key: "close",
 		value: function close(callback) {
-			this._knex.destroy(callback);
+			internal(this)._knex.destroy(callback);
 		}
 	}, {
 		key: "spy",
 		value: function spy(query, returnValue) {
-			if (!this._mockQueries) {
-				this._mockQueries = {};
+			if (!internal(this)._mockQueries) {
+				internal(this)._mockQueries = {};
 			}
 			var querySpy = new QuerySpy(query, returnValue);
-			this._mockQueries[query] = querySpy;
+			internal(this)._mockQueries[query] = querySpy;
 			return querySpy;
 		}
 	}, {
 		key: "mock",
 		value: function mock(queryValueMatrix) {
-			this._mockQueries = queryValueMatrix;
+			internal(this)._mockQueries = queryValueMatrix;
 		}
 	}, {
 		key: "unmock",
 		value: function unmock() {
-			this._mockQueries = undefined;
+			internal(this)._mockQueries = undefined;
 		}
 	}, {
 		key: "select",
@@ -100,7 +110,7 @@ var Database = (function () {
 	}, {
 		key: "load",
 		value: function load(fixtures, callback) {
-			var _this2 = this;
+			var _this = this;
 
 			var databaseSetupSteps = [];
 
@@ -108,7 +118,7 @@ var Database = (function () {
 				var fixtureData = fixtures[tableName];
 
 				databaseSetupSteps.push(function (done) {
-					_this2.dropTable(tableName).results(function (error, rows) {
+					_this.dropTable(tableName).results(function (error, rows) {
 						if (error) {
 							throw error;
 						}
@@ -117,7 +127,7 @@ var Database = (function () {
 				});
 
 				databaseSetupSteps.push(function (done) {
-					_this2.createTable(tableName, function (table) {
+					_this.createTable(tableName, function (table) {
 						table.increments();
 
 						var firstFixtureData = fixtureData[0];
@@ -143,7 +153,7 @@ var Database = (function () {
 
 				databaseSetupSteps.push(function (done) {
 					fixtureData.forEach(function (rowData) {
-						_this2.insert(rowData).into(tableName).results(function (error, rows) {
+						_this.insert(rowData).into(tableName).results(function (error, rows) {
 							if (error) {
 								throw error;
 							}
@@ -175,156 +185,156 @@ var Query = (function () {
 	function Query(database) {
 		_classCallCheck(this, Query);
 
-		this._database = database;
-		this._knex = database._knex;
+		internal(this)._database = database;
+		internal(this)._knex = database.getKnex();
 	}
 
 	_createClass(Query, [{
 		key: "select",
 		value: function select() {
-			var _knex;
+			var _internal$_knex;
 
-			this._query = (_knex = this._knex).select.apply(_knex, arguments);
+			internal(this)._query = (_internal$_knex = internal(this)._knex).select.apply(_internal$_knex, arguments);
 			return this;
 		}
 	}, {
 		key: "count",
 		value: function count() {
-			var _knex2;
+			var _internal$_knex2;
 
-			this._query = (_knex2 = this._knex).count.apply(_knex2, arguments);
+			internal(this)._query = (_internal$_knex2 = internal(this)._knex).count.apply(_internal$_knex2, arguments);
 			return this;
 		}
 	}, {
 		key: "insert",
 		value: function insert(data) {
-			this._query = this._knex.insert(data);
+			internal(this)._query = internal(this)._knex.insert(data);
 			return this;
 		}
 	}, {
 		key: "update",
 		value: function update(data) {
-			this._query = this._knex.update(data);
+			internal(this)._query = internal(this)._knex.update(data);
 			return this;
 		}
 	}, {
 		key: "delete",
 		value: function _delete() {
-			this._query = this._knex["delete"]();
+			internal(this)._query = internal(this)._knex["delete"]();
 			return this;
 		}
 	}, {
 		key: "from",
 		value: function from(tableName) {
-			if (this._query) {
-				this._query = this._query.from(tableName);
+			if (internal(this)._query) {
+				internal(this)._query = internal(this)._query.from(tableName);
 			} else {
-				this._query = this._knex(tableName);
+				internal(this)._query = internal(this)._knex(tableName);
 			}
 			return this;
 		}
 	}, {
 		key: "where",
 		value: function where() {
-			var _query;
+			var _internal$_query;
 
-			this._query = (_query = this._query).where.apply(_query, arguments);
+			internal(this)._query = (_internal$_query = internal(this)._query).where.apply(_internal$_query, arguments);
 			return this;
 		}
 	}, {
 		key: "andWhere",
 		value: function andWhere() {
-			var _query2;
+			var _internal$_query2;
 
-			this._query = (_query2 = this._query).andWhere.apply(_query2, arguments);
+			internal(this)._query = (_internal$_query2 = internal(this)._query).andWhere.apply(_internal$_query2, arguments);
 			return this;
 		}
 	}, {
 		key: "whereNull",
 		value: function whereNull() {
-			var _query3;
+			var _internal$_query3;
 
-			this._query = (_query3 = this._query).whereNull.apply(_query3, arguments);
+			internal(this)._query = (_internal$_query3 = internal(this)._query).whereNull.apply(_internal$_query3, arguments);
 			return this;
 		}
 	}, {
 		key: "whereNotNull",
 		value: function whereNotNull() {
-			var _query4;
+			var _internal$_query4;
 
-			this._query = (_query4 = this._query).whereNotNull.apply(_query4, arguments);
+			internal(this)._query = (_internal$_query4 = internal(this)._query).whereNotNull.apply(_internal$_query4, arguments);
 			return this;
 		}
 	}, {
 		key: "orWhere",
 		value: function orWhere() {
-			var _query5;
+			var _internal$_query5;
 
-			this._query = (_query5 = this._query).orWhere.apply(_query5, arguments);
+			internal(this)._query = (_internal$_query5 = internal(this)._query).orWhere.apply(_internal$_query5, arguments);
 			return this;
 		}
 	}, {
 		key: "groupBy",
 		value: function groupBy() {
-			var _query6;
+			var _internal$_query6;
 
-			this._query = (_query6 = this._query).groupBy.apply(_query6, arguments);
+			internal(this)._query = (_internal$_query6 = internal(this)._query).groupBy.apply(_internal$_query6, arguments);
 			return this;
 		}
 	}, {
 		key: "orderBy",
 		value: function orderBy(column, direction) {
-			this._query = this._query.orderBy(column, direction);
+			internal(this)._query = internal(this)._query.orderBy(column, direction);
 			return this;
 		}
 	}, {
 		key: "limit",
 		value: function limit(number) {
-			this._query = this._query.limit(number);
+			internal(this)._query = internal(this)._query.limit(number);
 			return this;
 		}
 	}, {
 		key: "leftJoin",
 		value: function leftJoin() {
-			var _query7;
+			var _internal$_query7;
 
-			this._query = (_query7 = this._query).leftJoin.apply(_query7, arguments);
+			internal(this)._query = (_internal$_query7 = internal(this)._query).leftJoin.apply(_internal$_query7, arguments);
 			return this;
 		}
 	}, {
 		key: "into",
 		value: function into(tableName) {
-			this._query = this._query.into(tableName);
+			internal(this)._query = internal(this)._query.into(tableName);
 			return this;
 		}
 	}, {
 		key: "dropTable",
 		value: function dropTable(tableName) {
-			this._query = this._knex.schema.dropTable(tableName);
+			internal(this)._query = internal(this)._knex.schema.dropTable(tableName);
 			return this;
 		}
 	}, {
 		key: "createTable",
 		value: function createTable(tableName, tableConstructor) {
-			this._query = this._knex.schema.createTable(tableName, tableConstructor);
+			internal(this)._query = internal(this)._knex.schema.createTable(tableName, tableConstructor);
 			return this;
 		}
 	}, {
 		key: "toString",
 		value: function toString() {
-			return this._query.toString();
+			return internal(this)._query.toString();
 		}
 	}, {
 		key: "results",
 		value: function results(callback) {
-			var _this3 = this;
+			var _this2 = this;
 
-			if (this._query.exec) {
-				var mockQueries = this._database._mockQueries;
+			if (internal(this)._query.exec) {
+				var mockQueries = internal(this)._database.getMockQueries();
 				if (mockQueries !== undefined) {
 					var _ret2 = (function () {
-						var query = _this3._query.toString();
-						_this3._query = null;
+						var query = internal(_this2)._query.toString();
+						internal(_this2)._query = null;
 
 						/* Check if string and has results */
 						var results = mockQueries[query];
@@ -376,8 +386,8 @@ var Query = (function () {
 
 					if (typeof _ret2 === "object") return _ret2.v;
 				} else {
-					this._query.exec(function (errors, rows) {
-						_this3._query = null;
+					internal(this)._query.exec(function (errors, rows) {
+						internal(_this2)._query = null;
 						callback(errors, rows);
 					});
 				}
@@ -393,34 +403,26 @@ var Query = (function () {
 exports.Query = Query;
 
 var QuerySpy = function QuerySpy(query, value) {
-	var _this4 = this;
+	var _this3 = this;
 
 	_classCallCheck(this, QuerySpy);
 
+	internal(this)._calls = 0;
+	internal(this)._query = query;
+	internal(this)._value = value;
+
+	//public properties
 	Object.defineProperties(this, {
-		"_calls": {
-			enumerable: false,
-			writable: true,
-			value: 0
-		},
 		"callCount": {
 			get: function get() {
-				return _this4._calls;
+				return internal(_this3)._calls;
 			}
 		},
 		"call": {
 			get: function get() {
-				_this4._calls += 1;
-				return _this4._value;
+				internal(_this3)._calls += 1;
+				return internal(_this3)._value;
 			}
-		},
-		"_query": {
-			enumerable: true,
-			value: query
-		},
-		"_value": {
-			enumerable: true,
-			value: value
 		}
 	});
 };
