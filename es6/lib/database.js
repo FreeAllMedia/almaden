@@ -1,50 +1,41 @@
 const knex = require("knex");
 const async = require("flowsync");
 
-let privateData = new WeakMap();
+let weakMap = new WeakMap();
 
-let internal = function (object) {
-    if (!privateData.has(object)) {
-			privateData.set(object, {});
+function privateData (object) {
+    if (!weakMap.has(object)) {
+			weakMap.set(object, {});
 		}
-    return privateData.get(object);
-};
+    return weakMap.get(object);
+}
 
 export default class Database {
 	constructor(databaseConfig) {
-		internal(this)._knex = knex(databaseConfig);
+		privateData(this).knex = knex(databaseConfig);
 
-		internal(this)._query = this.getKnex();
-		internal(this)._mockQueries = undefined;
-	}
-
-	getKnex() {
-		return internal(this)._knex;
-	}
-
-	getMockQueries() {
-		return internal(this)._mockQueries;
+    this.mockQueries = undefined;
 	}
 
 	close(callback) {
-		internal(this)._knex.destroy(callback);
+		privateData(this).knex.destroy(callback);
 	}
 
 	spy(query, returnValue) {
-		if(!internal(this)._mockQueries) {
-			internal(this)._mockQueries = {};
+		if(!this.mockQueries) {
+			this.mockQueries = {};
 		}
 		const querySpy = new QuerySpy(query, returnValue);
-		internal(this)._mockQueries[query] = querySpy;
+		this.mockQueries[query] = querySpy;
 		return querySpy;
 	}
 
 	mock(queryValueMatrix) {
-		internal(this)._mockQueries = queryValueMatrix;
+		this.mockQueries = queryValueMatrix;
 	}
 
 	unmock() {
-		internal(this)._mockQueries = undefined;
+		this.mockQueries = undefined;
 	}
 
 	select(...columns) {
@@ -138,114 +129,114 @@ export default class Database {
 
 export class Query {
 	constructor(database) {
-		internal(this)._database = database;
-		internal(this)._knex = database.getKnex();
+		privateData(this).database = database;
+		privateData(this).knex = privateData(database).knex;
 	}
 
 	select(...columns) {
-		internal(this)._query = internal(this)._knex.select(...columns);
+		privateData(this).query = privateData(this).knex.select(...columns);
 		return this;
 	}
 
 	count(...columns) {
-		internal(this)._query = internal(this)._knex.count(...columns);
+		privateData(this).query = privateData(this).knex.count(...columns);
 		return this;
 	}
 
 	insert(data) {
-		internal(this)._query = internal(this)._knex.insert(data);
+		privateData(this).query = privateData(this).knex.insert(data);
 		return this;
 	}
 
 	update(data) {
-		internal(this)._query = internal(this)._knex.update(data);
+		privateData(this).query = privateData(this).knex.update(data);
 		return this;
 	}
 
 	delete() {
-		internal(this)._query = internal(this)._knex.delete();
+		privateData(this).query = privateData(this).knex.delete();
 		return this;
 	}
 
 	from(tableName) {
-		if (internal(this)._query) {
-			internal(this)._query = internal(this)._query.from(tableName);
+		if (privateData(this).query) {
+			privateData(this).query = privateData(this).query.from(tableName);
 		} else {
-			internal(this)._query = internal(this)._knex(tableName);
+			privateData(this).query = privateData(this).knex(tableName);
 		}
 		return this;
 	}
 
 	where(...options) {
-		internal(this)._query = internal(this)._query.where(...options);
+		privateData(this).query = privateData(this).query.where(...options);
 		return this;
 	}
 
 	andWhere(...options) {
-		internal(this)._query = internal(this)._query.andWhere(...options);
+		privateData(this).query = privateData(this).query.andWhere(...options);
 		return this;
 	}
 
 	whereNull(...options) {
-		internal(this)._query = internal(this)._query.whereNull(...options);
+		privateData(this).query = privateData(this).query.whereNull(...options);
 		return this;
 	}
 
 	whereNotNull(...options) {
-		internal(this)._query = internal(this)._query.whereNotNull(...options);
+		privateData(this).query = privateData(this).query.whereNotNull(...options);
 		return this;
 	}
 
 	orWhere(...options) {
-		internal(this)._query = internal(this)._query.orWhere(...options);
+		privateData(this).query = privateData(this).query.orWhere(...options);
 		return this;
 	}
 
 	groupBy(...columnNames) {
-		internal(this)._query = internal(this)._query.groupBy(...columnNames);
+		privateData(this).query = privateData(this).query.groupBy(...columnNames);
 		return this;
 	}
 
 	orderBy(column, direction) {
-		internal(this)._query = internal(this)._query.orderBy(column, direction);
+		privateData(this).query = privateData(this).query.orderBy(column, direction);
 		return this;
 	}
 
 	limit(number) {
-		internal(this)._query = internal(this)._query.limit(number);
+		privateData(this).query = privateData(this).query.limit(number);
 		return this;
 	}
 
 	leftJoin(...options) {
-		internal(this)._query = internal(this)._query.leftJoin(...options);
+		privateData(this).query = privateData(this).query.leftJoin(...options);
 		return this;
 	}
 
 	into(tableName) {
-		internal(this)._query = internal(this)._query.into(tableName);
+		privateData(this).query = privateData(this).query.into(tableName);
 		return this;
 	}
 
 	dropTable(tableName) {
-		internal(this)._query = internal(this)._knex.schema.dropTable(tableName);
+		privateData(this).query = privateData(this).knex.schema.dropTable(tableName);
 		return this;
 	}
 
 	createTable(tableName, tableConstructor) {
-		internal(this)._query = internal(this)._knex.schema.createTable(tableName, tableConstructor);
+		privateData(this).query = privateData(this).knex.schema.createTable(tableName, tableConstructor);
 		return this;
 	}
 
 	toString() {
-		return internal(this)._query.toString();
+		return privateData(this).query.toString();
 	}
 
 	results(callback) {
-		if (internal(this)._query.exec) {
-			const mockQueries = internal(this)._database.getMockQueries();
+		if (privateData(this).query.exec) {
+			const mockQueries = privateData(this).database.mockQueries;
 			if (mockQueries !== undefined) {
-				let query = internal(this)._query.toString();
-				internal(this)._query = null;
+				let query = privateData(this).query.toString();
+				privateData(this).query = null;
 
 				/* Check if string and has results */
 				const results = mockQueries[query];
@@ -269,17 +260,17 @@ export class Query {
 				} else {
 					for(let key in mockQueries) {
 						if (key.charAt && key.charAt(0) === "/") {
-							const regularExpressionString = key.substr(1).substr(0, key.length-2);
+							const regularExpressionString = key.substr(1).substr(0, key.length - 2);
 							const regularExpression = new RegExp(regularExpressionString);
-							const results = mockQueries[key];
+							const queryResults = mockQueries[key];
 
 							if (query.match(regularExpression)) {
-								if (results instanceof Error) {
-									return callback(results, null);
-								} else if(results instanceof QuerySpy) {
-									return callback(null, results.call);
+								if (queryResults instanceof Error) {
+									return callback(queryResults, null);
+								} else if(queryResults instanceof QuerySpy) {
+									return callback(null, queryResults.call);
 								} else {
-									return callback(null, results);
+									return callback(null, queryResults);
 								}
 							}
 						}
@@ -288,8 +279,8 @@ export class Query {
 					throw new Error(`No mock values available for: "${query}"`, null);
 				}
 			} else {
-				internal(this)._query.exec((errors, rows) => {
-					internal(this)._query = null;
+				privateData(this).query.exec((errors, rows) => {
+					privateData(this).query = null;
 					callback(errors, rows);
 				});
 			}
@@ -301,21 +292,21 @@ export class Query {
 
 export class QuerySpy {
 	constructor(query, value) {
-		internal(this)._calls = 0;
-		internal(this)._query = query;
-		internal(this)._value = value;
+		privateData(this).calls = 0;
+		privateData(this).query = query;
+		privateData(this).value = value;
 
 		//public properties
 		Object.defineProperties(this, {
 			"callCount": {
 				get: () => {
-					return internal(this)._calls;
+					return privateData(this).calls;
 				}
 			},
 			"call": {
 				get: () => {
-					internal(this)._calls += 1;
-					return internal(this)._value;
+					privateData(this).calls += 1;
+					return privateData(this).value;
 				}
 			}
 		});
