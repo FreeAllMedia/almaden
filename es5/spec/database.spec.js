@@ -43,6 +43,18 @@ describe("Database(databaseConfig)", function () {
 		}
 	});
 
+	describe(".config", function () {
+		it("should return the config provided to the instance", function () {
+			database.config.should.eql(databaseConfig);
+		});
+
+		it("should be read-only", function () {
+			(function () {
+				database.config = {};
+			}).should["throw"]("Cannot set property config of [object Object] which has only a getter");
+		});
+	});
+
 	describe("(instance functions)", function () {
 		describe(".close(callback)", function () {
 			var callback = undefined;
