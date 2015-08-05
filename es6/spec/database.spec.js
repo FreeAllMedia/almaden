@@ -35,6 +35,18 @@ describe("Database(databaseConfig)", () => {
 		}
 	});
 
+	describe(".config", () => {
+		it("should return the config provided to the instance", () => {
+				database.config.should.eql(databaseConfig);
+		});
+
+		it("should be read-only", () => {
+			() => {
+				database.config = {};
+			}.should.throw("Cannot set property config of [object Object] which has only a getter");
+		});
+	});
+
 	describe("(instance functions)", () => {
 		describe(".close(callback)", () => {
 			let callback;
