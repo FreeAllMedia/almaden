@@ -6,25 +6,31 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var knex = require("knex");
-var async = require("flowsync");
+var _knex = require("knex");
 
-var weakMap = new WeakMap();
+var _knex2 = _interopRequireDefault(_knex);
 
-function privateData(object) {
-	if (!weakMap.has(object)) {
-		weakMap.set(object, {});
-	}
-	return weakMap.get(object);
-}
+var _flowsync = require("flowsync");
+
+var _flowsync2 = _interopRequireDefault(_flowsync);
+
+var _incognito = require("incognito");
+
+var _incognito2 = _interopRequireDefault(_incognito);
 
 var Database = (function () {
 	function Database(databaseConfig) {
 		_classCallCheck(this, Database);
 
-		privateData(this).knex = knex(databaseConfig);
+		var _ = (0, _incognito2["default"])(this);
+
+		_.config = databaseConfig;
+
+		_.knex = (0, _knex2["default"])(databaseConfig);
 
 		this.mockQueries = undefined;
 	}
@@ -32,7 +38,7 @@ var Database = (function () {
 	_createClass(Database, [{
 		key: "close",
 		value: function close(callback) {
-			privateData(this).knex.destroy(callback);
+			(0, _incognito2["default"])(this).knex.destroy(callback);
 		}
 	}, {
 		key: "spy",
@@ -156,12 +162,17 @@ var Database = (function () {
 				_loop(tableName);
 			}
 
-			async.series(databaseSetupSteps, callback);
+			_flowsync2["default"].series(databaseSetupSteps, callback);
 		}
 	}, {
 		key: "results",
 		value: function results() {
 			throw new Error("Cannot perform query without valid query stack. See docs for proper usage.");
+		}
+	}, {
+		key: "config",
+		get: function get() {
+			return (0, _incognito2["default"])(this).config;
 		}
 	}]);
 
@@ -174,8 +185,8 @@ var Query = (function () {
 	function Query(database) {
 		_classCallCheck(this, Query);
 
-		privateData(this).database = database;
-		privateData(this).knex = privateData(database).knex;
+		(0, _incognito2["default"])(this).database = database;
+		(0, _incognito2["default"])(this).knex = (0, _incognito2["default"])(database).knex;
 	}
 
 	_createClass(Query, [{
@@ -183,7 +194,7 @@ var Query = (function () {
 		value: function select() {
 			var _privateData$knex;
 
-			privateData(this).query = (_privateData$knex = privateData(this).knex).select.apply(_privateData$knex, arguments);
+			(0, _incognito2["default"])(this).query = (_privateData$knex = (0, _incognito2["default"])(this).knex).select.apply(_privateData$knex, arguments);
 			return this;
 		}
 	}, {
@@ -191,34 +202,34 @@ var Query = (function () {
 		value: function count() {
 			var _privateData$knex2;
 
-			privateData(this).query = (_privateData$knex2 = privateData(this).knex).count.apply(_privateData$knex2, arguments);
+			(0, _incognito2["default"])(this).query = (_privateData$knex2 = (0, _incognito2["default"])(this).knex).count.apply(_privateData$knex2, arguments);
 			return this;
 		}
 	}, {
 		key: "insert",
 		value: function insert(data) {
-			privateData(this).query = privateData(this).knex.insert(data);
+			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex.insert(data);
 			return this;
 		}
 	}, {
 		key: "update",
 		value: function update(data) {
-			privateData(this).query = privateData(this).knex.update(data);
+			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex.update(data);
 			return this;
 		}
 	}, {
 		key: "delete",
 		value: function _delete() {
-			privateData(this).query = privateData(this).knex["delete"]();
+			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex["delete"]();
 			return this;
 		}
 	}, {
 		key: "from",
 		value: function from(tableName) {
-			if (privateData(this).query) {
-				privateData(this).query = privateData(this).query.from(tableName);
+			if ((0, _incognito2["default"])(this).query) {
+				(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).query.from(tableName);
 			} else {
-				privateData(this).query = privateData(this).knex(tableName);
+				(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex(tableName);
 			}
 			return this;
 		}
@@ -227,7 +238,7 @@ var Query = (function () {
 		value: function where() {
 			var _privateData$query;
 
-			privateData(this).query = (_privateData$query = privateData(this).query).where.apply(_privateData$query, arguments);
+			(0, _incognito2["default"])(this).query = (_privateData$query = (0, _incognito2["default"])(this).query).where.apply(_privateData$query, arguments);
 			return this;
 		}
 	}, {
@@ -235,7 +246,7 @@ var Query = (function () {
 		value: function andWhere() {
 			var _privateData$query2;
 
-			privateData(this).query = (_privateData$query2 = privateData(this).query).andWhere.apply(_privateData$query2, arguments);
+			(0, _incognito2["default"])(this).query = (_privateData$query2 = (0, _incognito2["default"])(this).query).andWhere.apply(_privateData$query2, arguments);
 			return this;
 		}
 	}, {
@@ -243,7 +254,7 @@ var Query = (function () {
 		value: function whereNull() {
 			var _privateData$query3;
 
-			privateData(this).query = (_privateData$query3 = privateData(this).query).whereNull.apply(_privateData$query3, arguments);
+			(0, _incognito2["default"])(this).query = (_privateData$query3 = (0, _incognito2["default"])(this).query).whereNull.apply(_privateData$query3, arguments);
 			return this;
 		}
 	}, {
@@ -251,7 +262,7 @@ var Query = (function () {
 		value: function whereNotNull() {
 			var _privateData$query4;
 
-			privateData(this).query = (_privateData$query4 = privateData(this).query).whereNotNull.apply(_privateData$query4, arguments);
+			(0, _incognito2["default"])(this).query = (_privateData$query4 = (0, _incognito2["default"])(this).query).whereNotNull.apply(_privateData$query4, arguments);
 			return this;
 		}
 	}, {
@@ -259,7 +270,7 @@ var Query = (function () {
 		value: function orWhere() {
 			var _privateData$query5;
 
-			privateData(this).query = (_privateData$query5 = privateData(this).query).orWhere.apply(_privateData$query5, arguments);
+			(0, _incognito2["default"])(this).query = (_privateData$query5 = (0, _incognito2["default"])(this).query).orWhere.apply(_privateData$query5, arguments);
 			return this;
 		}
 	}, {
@@ -267,19 +278,19 @@ var Query = (function () {
 		value: function groupBy() {
 			var _privateData$query6;
 
-			privateData(this).query = (_privateData$query6 = privateData(this).query).groupBy.apply(_privateData$query6, arguments);
+			(0, _incognito2["default"])(this).query = (_privateData$query6 = (0, _incognito2["default"])(this).query).groupBy.apply(_privateData$query6, arguments);
 			return this;
 		}
 	}, {
 		key: "orderBy",
 		value: function orderBy(column, direction) {
-			privateData(this).query = privateData(this).query.orderBy(column, direction);
+			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).query.orderBy(column, direction);
 			return this;
 		}
 	}, {
 		key: "limit",
 		value: function limit(number) {
-			privateData(this).query = privateData(this).query.limit(number);
+			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).query.limit(number);
 			return this;
 		}
 	}, {
@@ -287,43 +298,43 @@ var Query = (function () {
 		value: function leftJoin() {
 			var _privateData$query7;
 
-			privateData(this).query = (_privateData$query7 = privateData(this).query).leftJoin.apply(_privateData$query7, arguments);
+			(0, _incognito2["default"])(this).query = (_privateData$query7 = (0, _incognito2["default"])(this).query).leftJoin.apply(_privateData$query7, arguments);
 			return this;
 		}
 	}, {
 		key: "into",
 		value: function into(tableName) {
-			privateData(this).query = privateData(this).query.into(tableName);
+			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).query.into(tableName);
 			return this;
 		}
 	}, {
 		key: "dropTable",
 		value: function dropTable(tableName) {
-			privateData(this).query = privateData(this).knex.schema.dropTable(tableName);
+			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex.schema.dropTable(tableName);
 			return this;
 		}
 	}, {
 		key: "createTable",
 		value: function createTable(tableName, tableConstructor) {
-			privateData(this).query = privateData(this).knex.schema.createTable(tableName, tableConstructor);
+			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex.schema.createTable(tableName, tableConstructor);
 			return this;
 		}
 	}, {
 		key: "toString",
 		value: function toString() {
-			return privateData(this).query.toString();
+			return (0, _incognito2["default"])(this).query.toString();
 		}
 	}, {
 		key: "results",
 		value: function results(callback) {
 			var _this2 = this;
 
-			if (privateData(this).query.exec) {
-				var mockQueries = privateData(this).database.mockQueries;
+			if ((0, _incognito2["default"])(this).query.exec) {
+				var mockQueries = (0, _incognito2["default"])(this).database.mockQueries;
 				if (mockQueries !== undefined) {
 					var _ret2 = (function () {
-						var query = privateData(_this2).query.toString();
-						privateData(_this2).query = null;
+						var query = (0, _incognito2["default"])(_this2).query.toString();
+						(0, _incognito2["default"])(_this2).query = null;
 
 						/* Check if string and has results */
 						var results = mockQueries[query];
@@ -375,8 +386,8 @@ var Query = (function () {
 
 					if (typeof _ret2 === "object") return _ret2.v;
 				} else {
-					privateData(this).query.exec(function (errors, rows) {
-						privateData(_this2).query = null;
+					(0, _incognito2["default"])(this).query.exec(function (errors, rows) {
+						(0, _incognito2["default"])(_this2).query = null;
 						callback(errors, rows);
 					});
 				}
@@ -396,21 +407,21 @@ var QuerySpy = function QuerySpy(query, value) {
 
 	_classCallCheck(this, QuerySpy);
 
-	privateData(this).calls = 0;
-	privateData(this).query = query;
-	privateData(this).value = value;
+	(0, _incognito2["default"])(this).calls = 0;
+	(0, _incognito2["default"])(this).query = query;
+	(0, _incognito2["default"])(this).value = value;
 
 	//public properties
 	Object.defineProperties(this, {
 		"callCount": {
 			get: function get() {
-				return privateData(_this3).calls;
+				return (0, _incognito2["default"])(_this3).calls;
 			}
 		},
 		"call": {
 			get: function get() {
-				privateData(_this3).calls += 1;
-				return privateData(_this3).value;
+				(0, _incognito2["default"])(_this3).calls += 1;
+				return (0, _incognito2["default"])(_this3).value;
 			}
 		}
 	});

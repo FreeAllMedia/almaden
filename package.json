@@ -35,6 +35,7 @@
   "homepage": "https://github.com/FreeAllMedia/almaden",
   "dependencies": {
     "flowsync": "^0.1.4",
+    "incognito": "^0.1.1",
     "knex": "0.7.4",
     "mysql": "^2.7.0"
   },

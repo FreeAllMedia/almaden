@@ -1,21 +1,21 @@
-const knex = require("knex");
-const async = require("flowsync");
-
-let weakMap = new WeakMap();
-
-function privateData (object) {
-    if (!weakMap.has(object)) {
-			weakMap.set(object, {});
-		}
-    return weakMap.get(object);
-}
+import knex from "knex";
+import async from "flowsync";
+import privateData from "incognito";
 
 export default class Database {
 	constructor(databaseConfig) {
-		privateData(this).knex = knex(databaseConfig);
+		const _ = privateData(this);
+
+    _.config = databaseConfig;
+
+    _.knex = knex(databaseConfig);
 
     this.mockQueries = undefined;
 	}
+
+  get config() {
+    return privateData(this).config;
+  }
 
 	close(callback) {
 		privateData(this).knex.destroy(callback);
