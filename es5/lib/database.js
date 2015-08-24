@@ -103,6 +103,12 @@ var Database = (function () {
 			return query.createTable(tableName, tableConstructor);
 		}
 	}, {
+		key: "createDatabase",
+		value: function createDatabase(databaseName) {
+			var query = new Query(this);
+			return query.createDatabase(databaseName);
+		}
+	}, {
 		key: "load",
 		value: function load(fixtures, callback) {
 			var _this = this;
@@ -317,6 +323,12 @@ var Query = (function () {
 		key: "createTable",
 		value: function createTable(tableName, tableConstructor) {
 			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex.schema.createTable(tableName, tableConstructor);
+			return this;
+		}
+	}, {
+		key: "createDatabase",
+		value: function createDatabase(databaseName) {
+			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex.raw("create database " + databaseName);
 			return this;
 		}
 	}, {

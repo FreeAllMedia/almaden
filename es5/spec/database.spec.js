@@ -421,6 +421,20 @@ describe("Database(databaseConfig)", function () {
 			});
 		});
 
+		describe(".createDatabase(databaseName)", function () {
+			it("should create a new database of the designated name", function (done) {
+				database.mock({
+					"create database some_database": [{}]
+				});
+
+				var databaseName = "some_database";
+
+				database.createDatabase(databaseName).results(function () {
+					done();
+				});
+			});
+		});
+
 		describe("(multiple querying)", function () {
 			it("should allow to execute two count queries withouth getting the query chain messed up", function (done) {
 				database.count("*").from("users").results(function () {
