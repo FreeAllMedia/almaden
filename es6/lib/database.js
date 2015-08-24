@@ -73,6 +73,11 @@ export default class Database {
 		return query.createTable(tableName, tableConstructor);
 	}
 
+	createDatabase(databaseName) {
+		const query = new Query(this);
+		return query.createDatabase(databaseName);
+	}
+
 	load(fixtures, callback) {
 		let databaseSetupSteps = [];
 		for(let tableName in fixtures) {
@@ -224,6 +229,11 @@ export class Query {
 
 	createTable(tableName, tableConstructor) {
 		privateData(this).query = privateData(this).knex.schema.createTable(tableName, tableConstructor);
+		return this;
+	}
+
+	createDatabase(databaseName) {
+		privateData(this).query = privateData(this).knex.raw(`create database ${databaseName}`);
 		return this;
 	}
 

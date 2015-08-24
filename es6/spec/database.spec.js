@@ -480,6 +480,22 @@ describe("Database(databaseConfig)", () => {
 			});
 		});
 
+		describe(".createDatabase(databaseName)", () => {
+			it("should create a new database of the designated name", done => {
+				database.mock({
+					"create database some_database": [{}]
+				});
+
+				const databaseName = "some_database";
+
+				database
+					.createDatabase(databaseName)
+					.results(() => {
+						done();
+					});
+			});
+		});
+
 		describe("(multiple querying)", () => {
 			it("should allow to execute two count queries withouth getting the query chain messed up", done => {
 				database
