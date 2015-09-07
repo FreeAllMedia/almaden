@@ -156,6 +156,20 @@ describe("Database(databaseConfig)", function () {
 					});
 				});
 			});
+
+			describe(".addMock", function () {
+				beforeEach(function () {
+					database = new _libDatabaseJs2["default"](databaseConfig);
+				});
+
+				it("should add a mock query to the query matrix", function (done) {
+					database.addMock("select * from `users` where `id` = 3", mockRows);
+					database.select("*").from("users").where("id", 3).results(function (error, rows) {
+						rows.should.equal(mockRows);
+						done();
+					});
+				});
+			});
 		});
 
 		describe("(spying)", function () {

@@ -41,6 +41,14 @@ var Database = (function () {
 			(0, _incognito2["default"])(this).knex.destroy(callback);
 		}
 	}, {
+		key: "addMock",
+		value: function addMock(query, returnValue) {
+			if (!this.mockQueries) {
+				this.mockQueries = {};
+			}
+			this.mockQueries[query] = returnValue;
+		}
+	}, {
 		key: "spy",
 		value: function spy(query, returnValue) {
 			if (!this.mockQueries) {
