@@ -21,6 +21,13 @@ export default class Database {
 		privateData(this).knex.destroy(callback);
 	}
 
+	addMock(query, returnValue) {
+		if(!this.mockQueries) {
+			this.mockQueries = {};
+		}
+		this.mockQueries[query] = returnValue;
+	}
+
 	spy(query, returnValue) {
 		if(!this.mockQueries) {
 			this.mockQueries = {};
