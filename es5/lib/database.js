@@ -41,6 +41,14 @@ var Database = (function () {
 			(0, _incognito2["default"])(this).knex.destroy(callback);
 		}
 	}, {
+		key: "addMock",
+		value: function addMock(query, returnValue) {
+			if (!this.mockQueries) {
+				this.mockQueries = {};
+			}
+			this.mockQueries[query] = returnValue;
+		}
+	}, {
 		key: "spy",
 		value: function spy(query, returnValue) {
 			if (!this.mockQueries) {
@@ -101,6 +109,12 @@ var Database = (function () {
 		value: function createTable(tableName, tableConstructor) {
 			var query = new Query(this);
 			return query.createTable(tableName, tableConstructor);
+		}
+	}, {
+		key: "createDatabase",
+		value: function createDatabase(databaseName) {
+			var query = new Query(this);
+			return query.createDatabase(databaseName);
 		}
 	}, {
 		key: "load",
@@ -317,6 +331,12 @@ var Query = (function () {
 		key: "createTable",
 		value: function createTable(tableName, tableConstructor) {
 			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex.schema.createTable(tableName, tableConstructor);
+			return this;
+		}
+	}, {
+		key: "createDatabase",
+		value: function createDatabase(databaseName) {
+			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex.raw("create database " + databaseName);
 			return this;
 		}
 	}, {

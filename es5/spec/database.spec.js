@@ -156,6 +156,20 @@ describe("Database(databaseConfig)", function () {
 					});
 				});
 			});
+
+			describe(".addMock", function () {
+				beforeEach(function () {
+					database = new _libDatabaseJs2["default"](databaseConfig);
+				});
+
+				it("should add a mock query to the query matrix", function (done) {
+					database.addMock("select * from `users` where `id` = 3", mockRows);
+					database.select("*").from("users").where("id", 3).results(function (error, rows) {
+						rows.should.equal(mockRows);
+						done();
+					});
+				});
+			});
 		});
 
 		describe("(spying)", function () {
@@ -416,6 +430,20 @@ describe("Database(databaseConfig)", function () {
 					table.integer("age");
 				}).results(function () {
 					// TODO: Check if table exists
+					done();
+				});
+			});
+		});
+
+		describe(".createDatabase(databaseName)", function () {
+			it("should create a new database of the designated name", function (done) {
+				database.mock({
+					"create database some_database": [{}]
+				});
+
+				var databaseName = "some_database";
+
+				database.createDatabase(databaseName).results(function () {
 					done();
 				});
 			});

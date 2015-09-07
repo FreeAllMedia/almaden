@@ -21,6 +21,13 @@ export default class Database {
 		privateData(this).knex.destroy(callback);
 	}
 
+	addMock(query, returnValue) {
+		if(!this.mockQueries) {
+			this.mockQueries = {};
+		}
+		this.mockQueries[query] = returnValue;
+	}
+
 	spy(query, returnValue) {
 		if(!this.mockQueries) {
 			this.mockQueries = {};
@@ -71,6 +78,11 @@ export default class Database {
 	createTable(tableName, tableConstructor) {
 		const query = new Query(this);
 		return query.createTable(tableName, tableConstructor);
+	}
+
+	createDatabase(databaseName) {
+		const query = new Query(this);
+		return query.createDatabase(databaseName);
 	}
 
 	load(fixtures, callback) {
@@ -224,6 +236,11 @@ export class Query {
 
 	createTable(tableName, tableConstructor) {
 		privateData(this).query = privateData(this).knex.schema.createTable(tableName, tableConstructor);
+		return this;
+	}
+
+	createDatabase(databaseName) {
+		privateData(this).query = privateData(this).knex.raw(`create database ${databaseName}`);
 		return this;
 	}
 

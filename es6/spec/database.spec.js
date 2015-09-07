@@ -179,6 +179,24 @@ describe("Database(databaseConfig)", () => {
 						});
 				});
 			});
+
+			describe(".addMock", () => {
+				beforeEach(() => {
+					database = new Database(databaseConfig);
+					database.addMock("select * from `users` where `id` = 3", mockRows);
+				});
+
+				it("should add a mock query to the query matrix", (done) => {
+					database
+						.select("*")
+						.from("users")
+						.where("id", 3)
+						.results((error, rows) => {
+							rows.should.equal(mockRows);
+							done();
+						});
+				});
+			});
 		});
 
 		describe("(spying)", () => {
@@ -475,6 +493,22 @@ describe("Database(databaseConfig)", () => {
 					})
 					.results(() => {
 						// TODO: Check if table exists
+						done();
+					});
+			});
+		});
+
+		describe(".createDatabase(databaseName)", () => {
+			it("should create a new database of the designated name", done => {
+				database.mock({
+					"create database some_database": [{}]
+				});
+
+				const databaseName = "some_database";
+
+				database
+					.createDatabase(databaseName)
+					.results(() => {
 						done();
 					});
 			});
