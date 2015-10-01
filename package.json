@@ -44,6 +44,7 @@
     "babel-eslint": "^3.1.26",
     "chai": "^3.0.0",
     "coveralls": "^2.11.2",
+    "del": "^2.0.2",
     "eslint": "^0.24.1",
     "gulp": "^3.9.0",
     "gulp-babel": "^5.1.0",
@@ -64,5 +65,5 @@
     "mocha": "^2.2.5",
     "superstack": "0.0.4"
   },
-  "generatorVersion": "0.2.20"
+  "generatorVersion": "0.2.22"
 }

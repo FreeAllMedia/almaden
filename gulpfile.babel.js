@@ -1,4 +1,5 @@
 import "./tasks/suppress-errors.js";
+import "./tasks/clean.js";
 import "./tasks/build-spec.js";
 import "./tasks/build-spec-assets.js";
 import "./tasks/build-lib.js";
