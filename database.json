@@ -33,6 +33,6 @@
 		"migrations": {
 			"tableName": "migrations"
 		},
-		"useMocking": false
+		"useMocking": true
 	}
 }
