@@ -223,12 +223,27 @@ export default class Query {
 					const argumentB = argumentsB[index];
 
 					if (argumentA !== argumentB) {
-						if (argumentA instanceof RegExp) {
-							if (argumentB.toString().match(argumentA) === null) {
+						if (argumentB instanceof RegExp) {
+							if (argumentA.toString().match(argumentB) === null) {
 								return false;
 							}
-						} else if (argumentB instanceof RegExp) {
-							if (argumentA.toString().match(argumentB) === null) {
+						} else if (argumentA instanceof Object) {
+							if (Object.keys(argumentA).length === Object.keys(argumentB).length) {
+								for (let subArgument in argumentA) {
+									const subArgumentA = argumentA[subArgument];
+									const subArgumentB = argumentB[subArgument];
+
+									if (subArgumentA !== subArgumentB) {
+										if (subArgumentB instanceof RegExp) {
+											if (subArgumentA.toString().match(subArgumentB) === null) {
+												return false;
+											}
+										} else {
+											return false;
+										}
+									}
+								}
+							} else {
 								return false;
 							}
 						} else {
