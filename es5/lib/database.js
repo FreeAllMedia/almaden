@@ -22,6 +22,29 @@ var _incognito = require("incognito");
 
 var _incognito2 = _interopRequireDefault(_incognito);
 
+var _queryJs = require("./query.js");
+
+var _queryJs2 = _interopRequireDefault(_queryJs);
+
+var _querySpyJs = require("./querySpy.js");
+
+var _querySpyJs2 = _interopRequireDefault(_querySpyJs);
+
+var _mockQueryJs = require("./mockQuery.js");
+
+var _mockQueryJs2 = _interopRequireDefault(_mockQueryJs);
+
+var _mockSelectQueryJs = require("./mockSelectQuery.js");
+
+var _mockSelectQueryJs2 = _interopRequireDefault(_mockSelectQueryJs);
+
+exports.Query = _queryJs2["default"];
+exports.QuerySpy = _querySpyJs2["default"];
+exports.MockQuery = _mockQueryJs2["default"];
+exports.MockSelectQuery = _mockSelectQueryJs2["default"];
+
+var newQuery = Symbol();
+
 var Database = (function () {
 	function Database(databaseConfig) {
 		_classCallCheck(this, Database);
@@ -29,10 +52,8 @@ var Database = (function () {
 		var _ = (0, _incognito2["default"])(this);
 
 		_.config = databaseConfig;
-
 		_.knex = (0, _knex2["default"])(databaseConfig);
-
-		this.mockQueries = undefined;
+		_.mockQueries = [];
 	}
 
 	_createClass(Database, [{
@@ -46,66 +67,50 @@ var Database = (function () {
 			if (!this.mockQueries) {
 				this.mockQueries = {};
 			}
-			var querySpy = new QuerySpy(query, returnValue);
+			var querySpy = new _querySpyJs2["default"](query, returnValue);
 			this.mockQueries[query] = querySpy;
 			return querySpy;
 		}
 	}, {
-		key: "mock",
-		value: function mock(queryValueMatrix) {
-			this.mockQueries = queryValueMatrix;
-		}
-	}, {
-		key: "unmock",
-		value: function unmock() {
-			this.mockQueries = undefined;
-		}
-	}, {
 		key: "select",
 		value: function select() {
-			var query = new Query(this);
+			var query = this[newQuery]();
 			return query.select.apply(query, arguments);
 		}
 	}, {
 		key: "insert",
 		value: function insert(data) {
-			var query = new Query(this);
+			var query = this[newQuery]();
 			return query.insert(data);
 		}
 	}, {
 		key: "update",
 		value: function update(data) {
-			var query = new Query(this);
+			var query = this[newQuery]();
 			return query.update(data);
-		}
-	}, {
-		key: "delete",
-		value: function _delete() {
-			var query = new Query(this);
-			return query["delete"]();
 		}
 	}, {
 		key: "count",
 		value: function count() {
-			var query = new Query(this);
+			var query = this[newQuery]();
 			return query.count.apply(query, arguments);
 		}
 	}, {
 		key: "dropTable",
 		value: function dropTable(tableName) {
-			var query = new Query(this);
+			var query = this[newQuery]();
 			return query.dropTable(tableName);
 		}
 	}, {
 		key: "createTable",
 		value: function createTable(tableName, tableConstructor) {
-			var query = new Query(this);
+			var query = this[newQuery]();
 			return query.createTable(tableName, tableConstructor);
 		}
 	}, {
 		key: "createDatabase",
 		value: function createDatabase(databaseName) {
-			var query = new Query(this);
+			var query = this[newQuery]();
 			return query.createDatabase(databaseName);
 		}
 	}, {
@@ -115,18 +120,15 @@ var Database = (function () {
 
 			var databaseSetupSteps = [];
 
-			var _loop = function (tableName) {
-				var fixtureData = fixtures[tableName];
-
+			var setupDeleteTable = function setupDeleteTable(tableName) {
 				databaseSetupSteps.push(function (done) {
-					_this.dropTable(tableName).results(function (error, rows) {
-						if (error) {
-							throw error;
-						}
+					_this.dropTable(tableName).results(function () {
 						done();
 					});
 				});
+			};
 
+			var setupCreateTable = function setupCreateTable(tableName, fixtureData) {
 				databaseSetupSteps.push(function (done) {
 					_this.createTable(tableName, function (table) {
 						table.increments();
@@ -144,17 +146,19 @@ var Database = (function () {
 								}
 							}
 						}
-					}).results(function (error, rows) {
+					}).results(function (error) {
 						if (error) {
 							throw error;
 						}
 						done();
 					});
 				});
+			};
 
-				databaseSetupSteps.push(function (done) {
-					fixtureData.forEach(function (rowData) {
-						_this.insert(rowData).into(tableName).results(function (error, rows) {
+			var setupInsertData = function setupInsertData(tableName, fixtureData) {
+				fixtureData.forEach(function (rowData) {
+					databaseSetupSteps.push(function (done) {
+						_this.insert(rowData).into(tableName).results(function (error) {
 							if (error) {
 								throw error;
 							}
@@ -165,20 +169,49 @@ var Database = (function () {
 			};
 
 			for (var tableName in fixtures) {
-				_loop(tableName);
+				var fixtureData = fixtures[tableName];
+				setupDeleteTable(tableName);
+				setupCreateTable(tableName, fixtureData);
+				setupInsertData(tableName, fixtureData);
 			}
 
 			_flowsync2["default"].series(databaseSetupSteps, callback);
 		}
 	}, {
 		key: "results",
+
+		// unmock() {
+		// 	this.mockQueries = undefined;
+		// }
+
 		value: function results() {
 			throw new Error("Cannot perform query without valid query stack. See docs for proper usage.");
+		}
+	}, {
+		key: newQuery,
+		value: function value() {
+			var _ = (0, _incognito2["default"])(this);
+			var defineMock = _.defineMock;
+			_.defineMock = false;
+			var query = new _queryJs2["default"](this, defineMock);
+			return query;
 		}
 	}, {
 		key: "config",
 		get: function get() {
 			return (0, _incognito2["default"])(this).config;
+		}
+	}, {
+		key: "delete",
+		get: function get() {
+			var query = this[newQuery]();
+			return query["delete"];
+		}
+	}, {
+		key: "mock",
+		get: function get() {
+			(0, _incognito2["default"])(this).defineMock = true;
+			return this;
 		}
 	}]);
 
@@ -186,257 +219,3 @@ var Database = (function () {
 })();
 
 exports["default"] = Database;
-
-var Query = (function () {
-	function Query(database) {
-		_classCallCheck(this, Query);
-
-		(0, _incognito2["default"])(this).database = database;
-		(0, _incognito2["default"])(this).knex = (0, _incognito2["default"])(database).knex;
-	}
-
-	_createClass(Query, [{
-		key: "select",
-		value: function select() {
-			var _privateData$knex;
-
-			(0, _incognito2["default"])(this).query = (_privateData$knex = (0, _incognito2["default"])(this).knex).select.apply(_privateData$knex, arguments);
-			return this;
-		}
-	}, {
-		key: "count",
-		value: function count() {
-			var _privateData$knex2;
-
-			(0, _incognito2["default"])(this).query = (_privateData$knex2 = (0, _incognito2["default"])(this).knex).count.apply(_privateData$knex2, arguments);
-			return this;
-		}
-	}, {
-		key: "insert",
-		value: function insert(data) {
-			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex.insert(data);
-			return this;
-		}
-	}, {
-		key: "update",
-		value: function update(data) {
-			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex.update(data);
-			return this;
-		}
-	}, {
-		key: "delete",
-		value: function _delete() {
-			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex["delete"]();
-			return this;
-		}
-	}, {
-		key: "from",
-		value: function from(tableName) {
-			if ((0, _incognito2["default"])(this).query) {
-				(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).query.from(tableName);
-			} else {
-				(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex(tableName);
-			}
-			return this;
-		}
-	}, {
-		key: "where",
-		value: function where() {
-			var _privateData$query;
-
-			(0, _incognito2["default"])(this).query = (_privateData$query = (0, _incognito2["default"])(this).query).where.apply(_privateData$query, arguments);
-			return this;
-		}
-	}, {
-		key: "andWhere",
-		value: function andWhere() {
-			var _privateData$query2;
-
-			(0, _incognito2["default"])(this).query = (_privateData$query2 = (0, _incognito2["default"])(this).query).andWhere.apply(_privateData$query2, arguments);
-			return this;
-		}
-	}, {
-		key: "whereNull",
-		value: function whereNull() {
-			var _privateData$query3;
-
-			(0, _incognito2["default"])(this).query = (_privateData$query3 = (0, _incognito2["default"])(this).query).whereNull.apply(_privateData$query3, arguments);
-			return this;
-		}
-	}, {
-		key: "whereNotNull",
-		value: function whereNotNull() {
-			var _privateData$query4;
-
-			(0, _incognito2["default"])(this).query = (_privateData$query4 = (0, _incognito2["default"])(this).query).whereNotNull.apply(_privateData$query4, arguments);
-			return this;
-		}
-	}, {
-		key: "orWhere",
-		value: function orWhere() {
-			var _privateData$query5;
-
-			(0, _incognito2["default"])(this).query = (_privateData$query5 = (0, _incognito2["default"])(this).query).orWhere.apply(_privateData$query5, arguments);
-			return this;
-		}
-	}, {
-		key: "groupBy",
-		value: function groupBy() {
-			var _privateData$query6;
-
-			(0, _incognito2["default"])(this).query = (_privateData$query6 = (0, _incognito2["default"])(this).query).groupBy.apply(_privateData$query6, arguments);
-			return this;
-		}
-	}, {
-		key: "orderBy",
-		value: function orderBy(column, direction) {
-			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).query.orderBy(column, direction);
-			return this;
-		}
-	}, {
-		key: "limit",
-		value: function limit(number) {
-			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).query.limit(number);
-			return this;
-		}
-	}, {
-		key: "leftJoin",
-		value: function leftJoin() {
-			var _privateData$query7;
-
-			(0, _incognito2["default"])(this).query = (_privateData$query7 = (0, _incognito2["default"])(this).query).leftJoin.apply(_privateData$query7, arguments);
-			return this;
-		}
-	}, {
-		key: "into",
-		value: function into(tableName) {
-			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).query.into(tableName);
-			return this;
-		}
-	}, {
-		key: "dropTable",
-		value: function dropTable(tableName) {
-			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex.schema.dropTable(tableName);
-			return this;
-		}
-	}, {
-		key: "createTable",
-		value: function createTable(tableName, tableConstructor) {
-			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex.schema.createTable(tableName, tableConstructor);
-			return this;
-		}
-	}, {
-		key: "createDatabase",
-		value: function createDatabase(databaseName) {
-			(0, _incognito2["default"])(this).query = (0, _incognito2["default"])(this).knex.raw("create database " + databaseName);
-			return this;
-		}
-	}, {
-		key: "toString",
-		value: function toString() {
-			return (0, _incognito2["default"])(this).query.toString();
-		}
-	}, {
-		key: "results",
-		value: function results(callback) {
-			var _this2 = this;
-
-			if ((0, _incognito2["default"])(this).query.exec) {
-				var mockQueries = (0, _incognito2["default"])(this).database.mockQueries;
-				if (mockQueries !== undefined) {
-					var _ret2 = (function () {
-						var query = (0, _incognito2["default"])(_this2).query.toString();
-						(0, _incognito2["default"])(_this2).query = null;
-
-						/* Check if string and has results */
-						var results = mockQueries[query];
-
-						if (results) {
-							if (results instanceof Error) {
-								callback(results, null);
-							} else if (results instanceof QuerySpy) {
-								callback(null, results.call);
-							} else {
-								callback(null, results);
-							}
-						} else if (typeof mockQueries === "function") {
-							mockQueries(query, function (error, result) {
-								if (!error && !result) {
-									throw new Error("No mock values available for: \"" + query + "\"", null);
-								} else {
-									callback(error, result);
-								}
-							});
-						} else {
-							for (var key in mockQueries) {
-								if (key.charAt && key.charAt(0) === "/") {
-									var regularExpressionString = key.substr(1).substr(0, key.length - 2);
-									var regularExpression = new RegExp(regularExpressionString);
-									var queryResults = mockQueries[key];
-
-									if (query.match(regularExpression)) {
-										if (queryResults instanceof Error) {
-											return {
-												v: callback(queryResults, null)
-											};
-										} else if (queryResults instanceof QuerySpy) {
-											return {
-												v: callback(null, queryResults.call)
-											};
-										} else {
-											return {
-												v: callback(null, queryResults)
-											};
-										}
-									}
-								}
-							}
-
-							throw new Error("No mock values available for: \"" + query + "\"", null);
-						}
-					})();
-
-					if (typeof _ret2 === "object") return _ret2.v;
-				} else {
-					(0, _incognito2["default"])(this).query.exec(function (errors, rows) {
-						(0, _incognito2["default"])(_this2).query = null;
-						callback(errors, rows);
-					});
-				}
-			} else {
-				throw new Error("Cannot perform query without valid query stack. See docs for proper usage.");
-			}
-		}
-	}]);
-
-	return Query;
-})();
-
-exports.Query = Query;
-
-var QuerySpy = function QuerySpy(query, value) {
-	var _this3 = this;
-
-	_classCallCheck(this, QuerySpy);
-
-	(0, _incognito2["default"])(this).calls = 0;
-	(0, _incognito2["default"])(this).query = query;
-	(0, _incognito2["default"])(this).value = value;
-
-	//public properties
-	Object.defineProperties(this, {
-		"callCount": {
-			get: function get() {
-				return (0, _incognito2["default"])(_this3).calls;
-			}
-		},
-		"call": {
-			get: function get() {
-				(0, _incognito2["default"])(_this3).calls += 1;
-				return (0, _incognito2["default"])(_this3).value;
-			}
-		}
-	});
-};
-
-exports.QuerySpy = QuerySpy;

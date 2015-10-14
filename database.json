@@ -14,15 +14,16 @@
 		},
 		"migrations": {
 			"tableName": "migrations"
-		}
+		},
+		"useMocking": false
 	},
 	"testing": {
 		"debug": false,
 		"client": "mysql",
 		"connection": {
 			"host": "localhost",
-			"user": "root",
-			"password": "",
+			"user": "test",
+			"password": "1234",
 			"database": "almaden_test"
 		},
 		"pool": {
@@ -31,6 +32,7 @@
 		},
 		"migrations": {
 			"tableName": "migrations"
-		}
+		},
+		"useMocking": false
 	}
 }
