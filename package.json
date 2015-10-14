@@ -1,6 +1,6 @@
-{ 
+{
   "name": "almaden",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "ES6 data adapter.",
   "main": "index.js",
   "scripts": {
