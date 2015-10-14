@@ -22,7 +22,7 @@ describe(".insert(data)", () => {
       database.mock.insert({
         name: fixture.name,
         age: fixture.age
-      }).into(tableName).results(fixture.id);
+      }).into(tableName).results([6]);
       done();
     } else {
       database.load({
