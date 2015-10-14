@@ -4,13 +4,9 @@ import privateData from "incognito";
 
 import Query from "./query.js";
 import QuerySpy from "./querySpy.js";
-import MockQuery from "./mockQuery.js";
-import MockSelectQuery from "./mockSelectQuery.js";
 
 export { Query };
 export { QuerySpy };
-export { MockQuery };
-export { MockSelectQuery };
 
 const newQuery = Symbol();
 
@@ -29,6 +25,13 @@ export default class Database {
 
 	close(callback) {
 		privateData(this).knex.destroy(callback);
+	}
+
+	addMock(query, returnValue) {
+		if(!this.mockQueries) {
+			this.mockQueries = {};
+		}
+		this.mockQueries[query] = returnValue;
 	}
 
 	spy(query, returnValue) {

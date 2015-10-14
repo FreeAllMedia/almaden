@@ -30,18 +30,8 @@ var _querySpyJs = require("./querySpy.js");
 
 var _querySpyJs2 = _interopRequireDefault(_querySpyJs);
 
-var _mockQueryJs = require("./mockQuery.js");
-
-var _mockQueryJs2 = _interopRequireDefault(_mockQueryJs);
-
-var _mockSelectQueryJs = require("./mockSelectQuery.js");
-
-var _mockSelectQueryJs2 = _interopRequireDefault(_mockSelectQueryJs);
-
 exports.Query = _queryJs2["default"];
 exports.QuerySpy = _querySpyJs2["default"];
-exports.MockQuery = _mockQueryJs2["default"];
-exports.MockSelectQuery = _mockSelectQueryJs2["default"];
 
 var newQuery = Symbol();
 
@@ -60,6 +50,14 @@ var Database = (function () {
 		key: "close",
 		value: function close(callback) {
 			(0, _incognito2["default"])(this).knex.destroy(callback);
+		}
+	}, {
+		key: "addMock",
+		value: function addMock(query, returnValue) {
+			if (!this.mockQueries) {
+				this.mockQueries = {};
+			}
+			this.mockQueries[query] = returnValue;
 		}
 	}, {
 		key: "spy",
