@@ -181,7 +181,11 @@ export default class Query {
 					const theirLink = theirChain[theirIndex];
 					const theirArguments = theirLink.options;
 
-					if (ourLink.name === theirLink.name) {
+					//so andWhere and where are treated both as the same
+					const theirLinkName = theirLink.name.replace("andWhere", "where");
+					const ourLinkName = ourLink.name.replace("andWhere", "where");
+
+					if (ourLinkName === theirLinkName) {
 						if (this[argumentsEqual](ourArguments, theirArguments)) {
 							hasMatchingLink = true;
 							break;
@@ -206,6 +210,10 @@ export default class Query {
 	}
 
 	[addChain](chainName, options) {
+		const chainNameId = chainName.replace("andWhere", "where"); //treat where equals to andWhere
+		if (chainNameId === "where" && options.length === 2) {
+			options = [options[0], "=", options[1]];
+		}
 		privateData(this).chain.push({
 			name: chainName,
 			options: options

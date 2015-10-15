@@ -10,10 +10,12 @@ var databaseConfig = require("../../../../database.json").testing;
 
 describe(".equalTo(query)", function () {
 
-  var database = undefined;
+  var database = undefined,
+      mockUsers = undefined;
 
   beforeEach(function () {
     database = new _libDatabaseJs2["default"](databaseConfig);
+    mockUsers = [{ id: 1, name: "Bob" }];
   });
 
   it("should compare simple queries that are equal and return true", function () {
@@ -71,6 +73,7 @@ describe(".equalTo(query)", function () {
 
     queryA.equalTo(queryB).should.be["true"];
   });
+
   it("should compare simple queries with regex object parameters that do not match and return false", function () {
     var data = {
       name: "Bob",
@@ -84,6 +87,34 @@ describe(".equalTo(query)", function () {
     }).into("users");
 
     queryA.equalTo(queryB).should.be["false"];
+  });
+
+  describe("(where)", function () {
+    it("should treat where equals to andWhere", function (done) {
+      var name = "aName";
+
+      database.mock.select(/.*/).from(/u.*rs/).where("created_at", ">", /.*/).where("name", name).results(mockUsers);
+
+      database.select("id").from("users").where("created_at", ">", "2015-10-02 21:39:14").andWhere("name", name).results(function (error, rows) {
+        if (error) {
+          throw error;
+        }
+        rows.should.eql(mockUsers);
+        done();
+      });
+    });
+
+    it("should use equals as the default operator", function (done) {
+      database.mock.select(/.*/).from(/u.*rs/).where("id", 1).results(mockUsers);
+
+      database.select("id").from("users").where("id", "=", 1).results(function (error, rows) {
+        if (error) {
+          throw error;
+        }
+        rows.should.eql(mockUsers);
+        done();
+      });
+    });
   });
 
   it("should compare complex queries that are equal and return true");

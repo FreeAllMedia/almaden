@@ -271,7 +271,11 @@ var Query = (function () {
 						var theirLink = theirChain[theirIndex];
 						var theirArguments = theirLink.options;
 
-						if (ourLink.name === theirLink.name) {
+						//so andWhere and where are treated both as the same
+						var theirLinkName = theirLink.name.replace("andWhere", "where");
+						var ourLinkName = ourLink.name.replace("andWhere", "where");
+
+						if (ourLinkName === theirLinkName) {
 							if (this[argumentsEqual](ourArguments, theirArguments)) {
 								hasMatchingLink = true;
 								break;
@@ -293,6 +297,10 @@ var Query = (function () {
 	}, {
 		key: addChain,
 		value: function value(chainName, options) {
+			var chainNameId = chainName.replace("andWhere", "where"); //treat where equals to andWhere
+			if (chainNameId === "where" && options.length === 2) {
+				options = [options[0], "=", options[1]];
+			}
 			(0, _incognito2["default"])(this).chain.push({
 				name: chainName,
 				options: options
