@@ -297,8 +297,7 @@ var Query = (function () {
 	}, {
 		key: addChain,
 		value: function value(chainName, options) {
-			var chainNameId = chainName.replace("andWhere", "where"); //treat where equals to andWhere
-			if (chainNameId === "where" && options.length === 2) {
+			if ((chainName === "where" || chainName === "andWhere") && options.length === 2) {
 				options = [options[0], "=", options[1]];
 			}
 			(0, _incognito2["default"])(this).chain.push({

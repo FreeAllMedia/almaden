@@ -210,8 +210,7 @@ export default class Query {
 	}
 
 	[addChain](chainName, options) {
-		const chainNameId = chainName.replace("andWhere", "where"); //treat where equals to andWhere
-		if (chainNameId === "where" && options.length === 2) {
+		if ((chainName === "where" || chainName === "andWhere") && options.length === 2) {
 			options = [options[0], "=", options[1]];
 		}
 		privateData(this).chain.push({
