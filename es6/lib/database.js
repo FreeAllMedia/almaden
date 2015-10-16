@@ -14,14 +14,14 @@ export default class Database {
 	constructor(databaseConfig) {
 		const _ = privateData(this);
 
-    _.config = databaseConfig;
-    _.knex = knex(databaseConfig);
-    _.mockQueries = [];
+		_.config = databaseConfig;
+		_.knex = knex(databaseConfig);
+		_.mockQueries = [];
 	}
 
-  get config() {
-    return privateData(this).config;
-  }
+	get config() {
+		return privateData(this).config;
+	}
 
 	close(callback) {
 		privateData(this).knex.destroy(callback);
