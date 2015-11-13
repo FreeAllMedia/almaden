@@ -5,11 +5,20 @@ const addChain = Symbol();
 const argumentsEqual = Symbol();
 
 export default class Query {
-	constructor(database, defineMock=false) {
-		privateData(this).defineMock = defineMock;
-		privateData(this).database = database;
-		privateData(this).knex = privateData(database).knex;
-		privateData(this).chain = [];
+	constructor(database) {
+		const _ = privateData(this);
+		_.database = database;
+		_.knex = privateData(database).knex;
+		_.calls = 0;
+		_.chain = [];
+	}
+
+	get calls() {
+		return privateData(this).calls;
+	}
+
+	get called() {
+		return this.calls > 0;
 	}
 
 	select(...columns) {
@@ -137,29 +146,24 @@ export default class Query {
 	results(callback) {
 		const _ = privateData(this);
 
-		if (_.query.exec) {
+		_.calls += 1;
 
+		if (_.query.exec) {
 			const mockQueries = privateData(_.database).mockQueries;
 
-			if (_.defineMock) {
-				const mockResults = callback;
-				mockQueries.push({
-					query: this,
-					results: mockResults
-				});
+			if (mockQueries.length > 0) {
+				this[mockExecute](mockQueries, callback);
 			} else {
-				if (mockQueries.length > 0) {
-					this[mockExecute](mockQueries, callback);
-				} else {
-					_.query.exec((errors, rows) => {
-						privateData(this).query = null;
-						callback(errors, rows);
-					});
-				}
+				_.query.exec((errors, rows) => {
+					privateData(this).query = null;
+					callback(errors, rows);
+				});
 			}
 		} else {
 			throw new Error("Cannot perform query without valid query stack. See docs for proper usage.");
 		}
+
+		return this;
 	}
 
 	equalTo(query) {

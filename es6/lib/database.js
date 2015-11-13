@@ -3,10 +3,10 @@ import async from "flowsync";
 import privateData from "incognito";
 
 import Query from "./query.js";
-import QuerySpy from "./querySpy.js";
+import MockQuery from "./mockQuery.js";
 
 export { Query };
-export { QuerySpy };
+export { MockQuery };
 
 const newQuery = Symbol();
 
@@ -25,22 +25,6 @@ export default class Database {
 
 	close(callback) {
 		privateData(this).knex.destroy(callback);
-	}
-
-	addMock(query, returnValue) {
-		if(!this.mockQueries) {
-			this.mockQueries = {};
-		}
-		this.mockQueries[query] = returnValue;
-	}
-
-	spy(query, returnValue) {
-		if(!this.mockQueries) {
-			this.mockQueries = {};
-		}
-		const querySpy = new QuerySpy(query, returnValue);
-		this.mockQueries[query] = querySpy;
-		return querySpy;
 	}
 
 	select(...columns) {
@@ -141,8 +125,11 @@ export default class Database {
 	}
 
 	get mock() {
-		privateData(this).defineMock = true;
-		return this;
+		return new MockQuery(this);
+	}
+
+	get spy() {
+		return new MockQuery(this);
 	}
 
 	// unmock() {
@@ -154,11 +141,7 @@ export default class Database {
 	}
 
 	[newQuery]() {
-		const _ = privateData(this);
-		const defineMock = _.defineMock;
-		_.defineMock = false;
-		const query = new Query(this, defineMock);
-		return query;
+		return new Query(this);
 	}
 
 }

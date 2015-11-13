@@ -2,7 +2,7 @@ import Database from "../../../lib/database.js";
 
 const databaseConfig = require("../../../../database.json").testing;
 
-describe(".chain", () => {
+describe("query.chain", () => {
 
   let database;
 

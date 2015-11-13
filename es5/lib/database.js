@@ -26,12 +26,12 @@ var _queryJs = require("./query.js");
 
 var _queryJs2 = _interopRequireDefault(_queryJs);
 
-var _querySpyJs = require("./querySpy.js");
+var _mockQueryJs = require("./mockQuery.js");
 
-var _querySpyJs2 = _interopRequireDefault(_querySpyJs);
+var _mockQueryJs2 = _interopRequireDefault(_mockQueryJs);
 
 exports.Query = _queryJs2["default"];
-exports.QuerySpy = _querySpyJs2["default"];
+exports.MockQuery = _mockQueryJs2["default"];
 
 var newQuery = Symbol();
 
@@ -50,24 +50,6 @@ var Database = (function () {
 		key: "close",
 		value: function close(callback) {
 			(0, _incognito2["default"])(this).knex.destroy(callback);
-		}
-	}, {
-		key: "addMock",
-		value: function addMock(query, returnValue) {
-			if (!this.mockQueries) {
-				this.mockQueries = {};
-			}
-			this.mockQueries[query] = returnValue;
-		}
-	}, {
-		key: "spy",
-		value: function spy(query, returnValue) {
-			if (!this.mockQueries) {
-				this.mockQueries = {};
-			}
-			var querySpy = new _querySpyJs2["default"](query, returnValue);
-			this.mockQueries[query] = querySpy;
-			return querySpy;
 		}
 	}, {
 		key: "select",
@@ -188,11 +170,7 @@ var Database = (function () {
 	}, {
 		key: newQuery,
 		value: function value() {
-			var _ = (0, _incognito2["default"])(this);
-			var defineMock = _.defineMock;
-			_.defineMock = false;
-			var query = new _queryJs2["default"](this, defineMock);
-			return query;
+			return new _queryJs2["default"](this);
 		}
 	}, {
 		key: "config",
@@ -208,8 +186,12 @@ var Database = (function () {
 	}, {
 		key: "mock",
 		get: function get() {
-			(0, _incognito2["default"])(this).defineMock = true;
-			return this;
+			return new _mockQueryJs2["default"](this);
+		}
+	}, {
+		key: "spy",
+		get: function get() {
+			return new _mockQueryJs2["default"](this);
 		}
 	}]);
 

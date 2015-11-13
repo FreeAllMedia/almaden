@@ -2,7 +2,7 @@ import Database from "../../../lib/database.js";
 
 const databaseConfig = require("../../../../database.json").testing;
 
-describe(".equalTo(query)", () => {
+describe("query.equalTo(query)", () => {
 
 	let database;
 

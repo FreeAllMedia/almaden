@@ -2,7 +2,7 @@ import Database from "../../lib/database.js";
 
 const databaseConfig = require("../../../database.json").testing;
 
-describe(".where", () => {
+describe(".mock.where(...options)", () => {
 	let database,
 		mockUsers;
 

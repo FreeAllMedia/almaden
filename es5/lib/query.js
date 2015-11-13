@@ -20,14 +20,13 @@ var argumentsEqual = Symbol();
 
 var Query = (function () {
 	function Query(database) {
-		var defineMock = arguments[1] === undefined ? false : arguments[1];
-
 		_classCallCheck(this, Query);
 
-		(0, _incognito2["default"])(this).defineMock = defineMock;
-		(0, _incognito2["default"])(this).database = database;
-		(0, _incognito2["default"])(this).knex = (0, _incognito2["default"])(database).knex;
-		(0, _incognito2["default"])(this).chain = [];
+		var _ = (0, _incognito2["default"])(this);
+		_.database = database;
+		_.knex = (0, _incognito2["default"])(database).knex;
+		_.calls = 0;
+		_.chain = [];
 	}
 
 	_createClass(Query, [{
@@ -226,29 +225,24 @@ var Query = (function () {
 
 			var _ = (0, _incognito2["default"])(this);
 
-			if (_.query.exec) {
+			_.calls += 1;
 
+			if (_.query.exec) {
 				var mockQueries = (0, _incognito2["default"])(_.database).mockQueries;
 
-				if (_.defineMock) {
-					var mockResults = callback;
-					mockQueries.push({
-						query: this,
-						results: mockResults
-					});
+				if (mockQueries.length > 0) {
+					this[mockExecute](mockQueries, callback);
 				} else {
-					if (mockQueries.length > 0) {
-						this[mockExecute](mockQueries, callback);
-					} else {
-						_.query.exec(function (errors, rows) {
-							(0, _incognito2["default"])(_this).query = null;
-							callback(errors, rows);
-						});
-					}
+					_.query.exec(function (errors, rows) {
+						(0, _incognito2["default"])(_this).query = null;
+						callback(errors, rows);
+					});
 				}
 			} else {
 				throw new Error("Cannot perform query without valid query stack. See docs for proper usage.");
 			}
+
+			return this;
 		}
 	}, {
 		key: "equalTo",
@@ -376,6 +370,16 @@ var Query = (function () {
 			} else {
 				throw new Error("No mock values available for: \"" + this.toString() + "\"", null);
 			}
+		}
+	}, {
+		key: "calls",
+		get: function get() {
+			return (0, _incognito2["default"])(this).calls;
+		}
+	}, {
+		key: "called",
+		get: function get() {
+			return this.calls > 0;
 		}
 	}, {
 		key: "delete",
