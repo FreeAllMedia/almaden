@@ -8,7 +8,7 @@ var _libDatabaseJs2 = _interopRequireDefault(_libDatabaseJs);
 
 var databaseConfig = require("../../../database.json").testing;
 
-describe(".where", function () {
+describe(".mock.where(...options)", function () {
 	var database = undefined,
 	    mockUsers = undefined;
 

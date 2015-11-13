@@ -7,11 +7,9 @@ var _libDatabaseJs = require("../../lib/database.js");
 var _libDatabaseJs2 = _interopRequireDefault(_libDatabaseJs);
 
 var databaseConfig = require("../../../database.json").testing;
-
 var userFixtures = require("../fixtures/users.json");
 
 describe(".insert(data)", function () {
-
   var database = undefined,
       tableName = undefined,
       fixture = undefined,

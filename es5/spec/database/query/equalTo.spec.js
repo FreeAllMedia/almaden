@@ -8,7 +8,7 @@ var _libDatabaseJs2 = _interopRequireDefault(_libDatabaseJs);
 
 var databaseConfig = require("../../../../database.json").testing;
 
-describe(".equalTo(query)", function () {
+describe("query.equalTo(query)", function () {
 
 	var database = undefined;
 

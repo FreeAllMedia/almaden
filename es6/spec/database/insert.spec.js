@@ -1,18 +1,15 @@
 import Database, {Query} from "../../lib/database.js";
-
 const databaseConfig = require("../../../database.json").testing;
-
 const userFixtures = require("../fixtures/users.json");
 
 describe(".insert(data)", () => {
-
   let database,
       tableName,
       fixture,
       fixtures;
 
   beforeEach(done => {
-		database = new Database(databaseConfig);
+	database = new Database(databaseConfig);
     tableName = "users";
 
     fixtures = userFixtures;

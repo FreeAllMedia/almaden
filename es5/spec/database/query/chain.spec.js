@@ -8,7 +8,7 @@ var _libDatabaseJs2 = _interopRequireDefault(_libDatabaseJs);
 
 var databaseConfig = require("../../../../database.json").testing;
 
-describe(".chain", function () {
+describe("query.chain", function () {
 
   var database = undefined;
 
