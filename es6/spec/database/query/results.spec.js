@@ -3,7 +3,6 @@ import Database from "../../../lib/database.js";
 const databaseConfig = require("../../../../database.json").testing;
 
 describe("query.results(callback)", () => {
-
 	let database;
 	let query;
 

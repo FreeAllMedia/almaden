@@ -21,6 +21,10 @@ export default class Query {
 		return this.calls > 0;
 	}
 
+	get call() {
+		privateData(this).calls += 1;
+	}
+
 	select(...columns) {
 		privateData(this).query = privateData(this).knex.select(...columns);
 		this[addChain]("select", columns);
@@ -272,11 +276,12 @@ export default class Query {
 	[mockExecute](mockQueries, callback) {
 		let mockFound = false;
 		let results;
+		let query;
 
 		for (let index in mockQueries) {
 			const mockQuery = mockQueries[index];
 
-			const query = mockQuery.query;
+			query = mockQuery.query;
 
 			results = mockQuery.results;
 
@@ -287,6 +292,7 @@ export default class Query {
 		}
 
 		if (mockFound) {
+			query.call;
 			callback(undefined, results);
 		} else {
 			throw new Error(`No mock values available for: "${this.toString()}"`, null);

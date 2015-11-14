@@ -351,11 +351,12 @@ var Query = (function () {
 		value: function value(mockQueries, callback) {
 			var mockFound = false;
 			var results = undefined;
+			var query = undefined;
 
 			for (var index in mockQueries) {
 				var mockQuery = mockQueries[index];
 
-				var query = mockQuery.query;
+				query = mockQuery.query;
 
 				results = mockQuery.results;
 
@@ -366,6 +367,7 @@ var Query = (function () {
 			}
 
 			if (mockFound) {
+				query.call;
 				callback(undefined, results);
 			} else {
 				throw new Error("No mock values available for: \"" + this.toString() + "\"", null);
@@ -380,6 +382,11 @@ var Query = (function () {
 		key: "called",
 		get: function get() {
 			return this.calls > 0;
+		}
+	}, {
+		key: "call",
+		get: function get() {
+			(0, _incognito2["default"])(this).calls += 1;
 		}
 	}, {
 		key: "delete",
