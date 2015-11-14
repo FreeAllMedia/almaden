@@ -9,7 +9,6 @@ var _libDatabaseJs2 = _interopRequireDefault(_libDatabaseJs);
 var databaseConfig = require("../../../../database.json").testing;
 
 describe("query.results(callback)", function () {
-
 	var database = undefined;
 	var query = undefined;
 

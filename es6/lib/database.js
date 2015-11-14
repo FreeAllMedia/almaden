@@ -128,10 +128,6 @@ export default class Database {
 		return new MockQuery(this);
 	}
 
-	get spy() {
-		return new MockQuery(this);
-	}
-
 	// unmock() {
 	// 	this.mockQueries = undefined;
 	// }
