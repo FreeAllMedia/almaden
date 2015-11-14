@@ -188,11 +188,6 @@ var Database = (function () {
 		get: function get() {
 			return new _mockQueryJs2["default"](this);
 		}
-	}, {
-		key: "spy",
-		get: function get() {
-			return new _mockQueryJs2["default"](this);
-		}
 	}]);
 
 	return Database;
