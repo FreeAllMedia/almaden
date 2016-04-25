@@ -22,7 +22,7 @@ export default class Query {
 	}
 
 	get call() {
-		privateData(this).calls += 1;
+		privateData(this).calls = privateData(this).calls + 1;
 	}
 
 	select(...columns) {

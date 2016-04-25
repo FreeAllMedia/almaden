@@ -33,4 +33,25 @@ describe(".mock.results(mockResults)", () => {
 				done();
 			});
 	});
+
+	it("should increment the call count more than once", done => {
+		const user = {
+			id: "cigyn1qip0000nxz84cv3bwu6",
+			name: "Bob"
+		};
+
+		let mockQuery = database.mock
+			.select("*")
+			.from("users")
+			.results(user);
+
+		const query = database.select("*").from("users");
+
+		query.results(() => {
+				query.results(() => {
+						mockQuery.calls.should.eql(2);
+						done();
+					});
+			});
+	});
 });

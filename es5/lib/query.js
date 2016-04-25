@@ -386,7 +386,7 @@ var Query = (function () {
 	}, {
 		key: "call",
 		get: function get() {
-			(0, _incognito2["default"])(this).calls += 1;
+			(0, _incognito2["default"])(this).calls = (0, _incognito2["default"])(this).calls + 1;
 		}
 	}, {
 		key: "delete",

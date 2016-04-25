@@ -33,4 +33,22 @@ describe(".mock.results(mockResults)", function () {
 			done();
 		});
 	});
+
+	it("should increment the call count more than once", function (done) {
+		var user = {
+			id: "cigyn1qip0000nxz84cv3bwu6",
+			name: "Bob"
+		};
+
+		var mockQuery = database.mock.select("*").from("users").results(user);
+
+		var query = database.select("*").from("users");
+
+		query.results(function () {
+			query.results(function () {
+				mockQuery.calls.should.eql(2);
+				done();
+			});
+		});
+	});
 });
